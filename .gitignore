@@ -1,0 +1,24 @@
+# Gradle
+.gradle
+build
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# Mac
+**/.DS_Store
+
+# Eclipse
+.classpath
+.settings/
+.project
+
+*.jar
+*.war
+*.ear
+
+*.class
+
+bin/
+
+Thumbs.db
