@@ -20,7 +20,7 @@ public class MyFitnessPal {
 				requestSession(args[1], args[2]);
 				break;
 			case "use":
-				if (args.length == 7 || args.length == 8) {
+				if (args.length == 6 || args.length == 7) {
 					ListerData lc = new ListerData(CONFIG_DATA);
 					lc.load();
 					generateList(lc, args[1], args[2], args[3], args[4], args[5], args.length == 6 ? "" : args[6]);
@@ -45,7 +45,7 @@ public class MyFitnessPal {
 	private static void generateList(MFPSession session, ListerData lc, String option, String day, String month, String year, String meals) throws IOException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
-		FoodList fl = new FoodList(lc, session.getDayFood(calendar.getTime(), option, new CustomFoodFormater(lc)));
+		FoodList fl = new FoodList(lc, session.getDayFood(calendar.getTime(), meals, new CustomFoodFormater(lc)));
 
 		String result;
 
