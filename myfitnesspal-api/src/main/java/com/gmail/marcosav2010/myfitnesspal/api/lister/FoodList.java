@@ -52,7 +52,7 @@ public class FoodList {
 		}
 	}
 
-	public Collection<String> toList(boolean buy) {
+	public List<String> toList(boolean buy) {
 		List<String> out = new LinkedList<>();
 
 		toFood(buy).forEach(f -> {
