@@ -1,0 +1,15 @@
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'com.google.guava:guava:27.0.1-jre'
+
+    //testImplementation 'junit:junit:4.12'
+    
+    implementation 'org.jsoup:jsoup:1.12.1'
+    implementation 'org.json:json:20190722'
+    
+    compileOnly "org.projectlombok:lombok:1.18.10"
+    annotationProcessor "org.projectlombok:lombok:1.18.10"
+}
