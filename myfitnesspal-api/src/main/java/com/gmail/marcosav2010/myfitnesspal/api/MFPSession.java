@@ -16,9 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -27,6 +24,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodFormater;
+import com.gmail.marcosav2010.myfitnesspal.json.JSONArray;
+import com.gmail.marcosav2010.myfitnesspal.json.JSONException;
+import com.gmail.marcosav2010.myfitnesspal.json.JSONObject;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -99,13 +99,13 @@ public class MFPSession {
 		authenticityToken = doc.selectFirst("input[name='authenticity_token']").val();
 		res = Jsoup.connect(LOGIN_URL).data("username", username).data("password", password).method(Method.POST).execute();
 		cookies.putAll(res.cookies());
-		
+
 		try {
 			loadUserMetadata();
-			
+
 		} catch (JSONException ex) {
 			throw new RuntimeException("There was an error related to JSON, probably wrong user/password");
-			
+
 		} catch (IOException ex) {
 			throw new RuntimeException("There was an error while logging in: " + ex.getMessage());
 		}
@@ -139,7 +139,7 @@ public class MFPSession {
 	public List<Meal> getDayFood(Date date, String meals, FoodFormater fa) throws IOException {
 		return getDayFood(date, parseMeals(meals), fa);
 	}
-	
+
 	public List<Meal> getDayFood(Date date, FoodFormater fa) throws IOException {
 		return getDayFood(date, getDefaultMeals(), fa);
 	}

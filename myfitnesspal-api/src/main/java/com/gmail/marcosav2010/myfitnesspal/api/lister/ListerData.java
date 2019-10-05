@@ -8,8 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.json.JSONObject;
-
+import com.gmail.marcosav2010.myfitnesspal.json.JSONObject;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 

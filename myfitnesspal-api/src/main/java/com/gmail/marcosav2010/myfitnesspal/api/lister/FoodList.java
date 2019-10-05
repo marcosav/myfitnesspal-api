@@ -6,10 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
-
 import com.gmail.marcosav2010.myfitnesspal.api.Food;
 import com.gmail.marcosav2010.myfitnesspal.api.Meal;
+import com.gmail.marcosav2010.myfitnesspal.json.JSONArray;
 
 import lombok.AllArgsConstructor;
 
@@ -34,8 +33,8 @@ public class FoodList {
 		return "";
 	}
 
-	private Collection<Food> transform(boolean stack) {
-		if (stack) {
+	public Collection<Food> toFood(boolean buy) {
+		if (buy) {
 			Map<String, Food> out = new HashMap<>();
 			inputList.forEach(m -> m.getFood().forEach(f -> {
 				if (out.containsKey(f.getName())) {
@@ -53,10 +52,10 @@ public class FoodList {
 		}
 	}
 
-	public List<String> generate(boolean buy) {
+	public Collection<String> toList(boolean buy) {
 		List<String> out = new LinkedList<>();
 
-		transform(buy).forEach(f -> {
+		toFood(buy).forEach(f -> {
 			String alias = f.getName();
 			String q = "";
 
@@ -85,8 +84,8 @@ public class FoodList {
 
 		return out;
 	}
-	
+
 	public String toJSON(boolean buy) {
-		return new JSONArray(generate(buy)).toString();
+		return new JSONArray(toList(buy)).toString();
 	}
 }
