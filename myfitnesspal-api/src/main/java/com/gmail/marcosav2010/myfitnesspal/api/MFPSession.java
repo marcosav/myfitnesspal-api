@@ -118,7 +118,7 @@ public class MFPSession {
 	private Set<Integer> parseMeals(String meals) {
 		meals = meals.replaceAll("[^-?0-9]+", "");
 		try {
-			return Stream.of(meals.trim().split("")).map(n -> Integer.parseInt(n)).collect(Collectors.toSet());
+			return Stream.of(meals.trim().split("")).filter(n -> !n.isEmpty()).map(n -> Integer.parseInt(n)).collect(Collectors.toSet());
 		} catch (Exception ex) {
 			return getDefaultMeals();
 		}
