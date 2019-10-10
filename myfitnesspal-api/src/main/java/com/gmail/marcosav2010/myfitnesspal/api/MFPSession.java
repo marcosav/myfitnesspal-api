@@ -62,7 +62,7 @@ public class MFPSession {
 	private JSONArray mealNames;
 	private Set<Integer> defaultMealIndexes = new HashSet<>();
 
-	private long sessionExpirationTime;
+	// private long sessionExpirationTime;
 
 	@Getter
 	private String username;
@@ -70,7 +70,7 @@ public class MFPSession {
 	public String encode() {
 		JSONObject json = new JSONObject();
 		json.put("username", username);
-		json.put("sessionExpirationTime", sessionExpirationTime);
+		// json.put("sessionExpirationTime", sessionExpirationTime);
 		json.put("cookies", cookies);
 		json.put("mealNames", mealNames);
 		json.put("defaultMealIndexes", defaultMealIndexes);
@@ -80,16 +80,16 @@ public class MFPSession {
 	private void parse(String jsonString) {
 		JSONObject json = new JSONObject(jsonString.replaceAll("__", "\""));
 		username = json.getString("username");
-		sessionExpirationTime = json.getLong("sessionExpirationTime");
+		// sessionExpirationTime = json.getLong("sessionExpirationTime");
 		mealNames = json.getJSONArray("mealNames");
 		json.getJSONArray("defaultMealIndexes").toList().forEach(e -> defaultMealIndexes.add((Integer) e));
 		cookies.clear();
 		json.getJSONObject("cookies").toMap().forEach((k, v) -> cookies.put(k, (String) v));
 	}
 
-	private boolean needsRelog() {
-		return sessionExpirationTime < System.currentTimeMillis();
-	}
+	/*
+	 * private boolean needsRelog() { return sessionExpirationTime < System.currentTimeMillis(); }
+	 */
 
 	private void login(String username, String password) throws IOException {
 		this.username = username;
@@ -145,8 +145,9 @@ public class MFPSession {
 	}
 
 	public List<Meal> getDayFood(Date date, Set<Integer> requestedMeals, FoodFormater fa) throws IOException {
-		if (needsRelog())
-			throw new IllegalStateException("Session expired");
+		/*
+		 * if (needsRelog()) throw new IllegalStateException("Session expired");
+		 */
 
 		String foodDateURL = getURLForDate(date);
 
@@ -198,7 +199,7 @@ public class MFPSession {
 	private void loadUserMetadata() throws IOException {
 		authToken = new JSONObject(Jsoup.connect(getURL(USER_AUTH_DATA)).ignoreContentType(true).cookies(cookies).get().body().html());
 
-		sessionExpirationTime = System.currentTimeMillis() + authToken.getLong("expires_in") * 1000;
+		// sessionExpirationTime = System.currentTimeMillis() + authToken.getLong("expires_in") * 1000;
 		userId = authToken.getString("user_id");
 		accessToken = authToken.getString("access_token");
 		tokenType = authToken.getString("token_type");
