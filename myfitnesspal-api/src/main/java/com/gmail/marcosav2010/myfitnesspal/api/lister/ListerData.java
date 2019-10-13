@@ -12,6 +12,7 @@ import com.gmail.marcosav2010.myfitnesspal.json.JSONObject;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -24,12 +25,19 @@ public class ListerData {
 	private String data;
 	private JSONObject config;
 
+	@Getter
 	private final Set<String> exceptions = createSet(), unitAliases = createSet(), buyMeasured = createSet(), sacar = createSet(), pesar = createSet(),
 			picar = createSet();
+	@Getter
 	private final Map<String, String> aliases = createMap();
+	@Getter
 	private final Map<String, Double> conversions = createMap();
+	@Getter
 	private final Multimap<String, Integer> datedFood = createMMap();
 
+	@Getter
+	private final Map<String, Object> allConfig = createMap();
+	
 	private void clear() {
 		exceptions.clear();
 		unitAliases.clear();
@@ -108,17 +116,24 @@ public class ListerData {
 		return Double.parseDouble(String.valueOf(en.getValue()));
 	}
 
+	private void save(String name, Object config) {
+		allConfig.put(name, config);
+	}
+	
 	private void fillSet(Set<String> set, String name) {
+		save(name, set);
 		config.getJSONArray(name).forEach(e -> set.add(((String) e).toLowerCase()));
 	}
 
 	@SuppressWarnings("unchecked")
 	private <V> void fillMap(Map<String, V> map, String name) {
+		save(name, map);
 		config.getJSONObject(name).toMap().forEach((k, v) -> map.put(k.toLowerCase(), (V) v));
 	}
 
 	@SuppressWarnings("unchecked")
 	private <V> void fillMultimap(Multimap<String, V> mmap, String name) {
+		save(name, mmap);
 		config.getJSONObject(name).toMap().forEach((k, v) -> mmap.putAll(k.toLowerCase(), (List<V>) v));
 	}
 
