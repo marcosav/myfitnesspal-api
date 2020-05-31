@@ -22,3 +22,6 @@ gradle-app.setting
 bin/
 
 Thumbs.db
+
+.vscode
+.idea
