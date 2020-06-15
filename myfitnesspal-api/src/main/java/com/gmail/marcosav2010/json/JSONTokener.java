@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 import java.io.BufferedReader;
 import java.io.IOException;

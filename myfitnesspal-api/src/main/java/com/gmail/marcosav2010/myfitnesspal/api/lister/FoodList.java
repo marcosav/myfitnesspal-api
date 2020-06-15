@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.gmail.marcosav2010.json.JSONArray;
 import com.gmail.marcosav2010.myfitnesspal.api.Food;
 import com.gmail.marcosav2010.myfitnesspal.api.Meal;
-import com.gmail.marcosav2010.myfitnesspal.json.JSONArray;
 
 import lombok.AllArgsConstructor;
 

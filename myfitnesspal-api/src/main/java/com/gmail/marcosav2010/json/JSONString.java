@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 /**
  * The <code>JSONString</code> interface allows a <code>toJSONString()</code> method so that a class

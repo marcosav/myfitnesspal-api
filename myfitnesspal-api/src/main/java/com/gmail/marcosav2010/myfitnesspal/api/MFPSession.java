@@ -23,10 +23,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.gmail.marcosav2010.json.JSONArray;
+import com.gmail.marcosav2010.json.JSONException;
+import com.gmail.marcosav2010.json.JSONObject;
 import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodFormater;
-import com.gmail.marcosav2010.myfitnesspal.json.JSONArray;
-import com.gmail.marcosav2010.myfitnesspal.json.JSONException;
-import com.gmail.marcosav2010.myfitnesspal.json.JSONObject;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,6 +34,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession {
+
+	private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
 	private static DateFormat DATE_FORMAT = new SimpleDateFormat("yy-MM-dd");
 
@@ -62,7 +64,8 @@ public class MFPSession {
 	private JSONArray mealNames;
 	private Set<Integer> defaultMealIndexes = new HashSet<>();
 
-	// private long sessionExpirationTime;
+	@Getter
+	private long creationTime;
 
 	@Getter
 	private String username;
@@ -70,7 +73,7 @@ public class MFPSession {
 	public String encode() {
 		JSONObject json = new JSONObject();
 		json.put("username", username);
-		// json.put("sessionExpirationTime", sessionExpirationTime);
+		json.put("creationTime", creationTime);
 		json.put("cookies", cookies);
 		json.put("mealNames", mealNames);
 		json.put("defaultMealIndexes", defaultMealIndexes);
@@ -80,16 +83,16 @@ public class MFPSession {
 	private void parse(String jsonString) {
 		JSONObject json = new JSONObject(jsonString.replaceAll("__", "\""));
 		username = json.getString("username");
-		// sessionExpirationTime = json.getLong("sessionExpirationTime");
+		creationTime = json.getLong("creationTime");
 		mealNames = json.getJSONArray("mealNames");
 		json.getJSONArray("defaultMealIndexes").toList().forEach(e -> defaultMealIndexes.add((Integer) e));
 		cookies.clear();
 		json.getJSONObject("cookies").toMap().forEach((k, v) -> cookies.put(k, (String) v));
 	}
 
-	/*
-	 * private boolean needsRelog() { return sessionExpirationTime < System.currentTimeMillis(); }
-	 */
+	public boolean shouldRelog() {
+		return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_EXPIRATION_TIME;
+	}
 
 	private void login(String username, String password) throws IOException {
 		this.username = username;
@@ -145,10 +148,6 @@ public class MFPSession {
 	}
 
 	public List<Meal> getDayFood(Date date, Set<Integer> requestedMeals, FoodFormater fa) throws IOException {
-		/*
-		 * if (needsRelog()) throw new IllegalStateException("Session expired");
-		 */
-
 		String foodDateURL = getURLForDate(date);
 
 		Document foodDoc = Jsoup.connect(foodDateURL).cookies(cookies).get();
@@ -199,7 +198,7 @@ public class MFPSession {
 	private void loadUserMetadata() throws IOException {
 		authToken = new JSONObject(Jsoup.connect(getURL(USER_AUTH_DATA)).ignoreContentType(true).cookies(cookies).get().body().html());
 
-		// sessionExpirationTime = System.currentTimeMillis() + authToken.getLong("expires_in") * 1000;
+		creationTime = System.currentTimeMillis();
 		userId = authToken.getString("user_id");
 		accessToken = authToken.getString("access_token");
 		tokenType = authToken.getString("token_type");

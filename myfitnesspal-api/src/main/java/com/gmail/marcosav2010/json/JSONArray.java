@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 /*
  * Copyright (c) 2002 JSON.org

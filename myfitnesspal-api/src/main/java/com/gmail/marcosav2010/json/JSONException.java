@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.

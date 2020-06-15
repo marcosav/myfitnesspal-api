@@ -1,7 +1,7 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 /*
- * Copyright (c) 2018 JSON.org
+ * Copyright (c) 2002 JSON.org
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,24 +21,22 @@ package com.gmail.marcosav2010.myfitnesspal.json;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-@Documented
-@Retention(RUNTIME)
-@Target({ METHOD })
 /**
- * Use this annotation on a getter method to override the Bean name parser for Bean -&gt; JSONObject
- * mapping. A value set to empty string <code>""</code> will have the Bean parser fall back to the
- * default field name processing.
+ * The JSONPointerException is thrown by {@link JSONPointer} if an error occurs during evaluating a
+ * pointer.
+ * 
+ * @author JSON.org
+ * @version 2016-05-13
  */
-public @interface JSONPropertyName {
-	/**
-	 * @return The name of the property as to be used in the JSON Object.
-	 */
-	String value();
+public class JSONPointerException extends JSONException {
+	private static final long serialVersionUID = 8872944667561856751L;
+
+	public JSONPointerException(String message) {
+		super(message);
+	}
+
+	public JSONPointerException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

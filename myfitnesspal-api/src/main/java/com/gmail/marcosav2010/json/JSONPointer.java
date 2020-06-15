@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.json;
+package com.gmail.marcosav2010.json;
 
 import static java.lang.String.format;
 

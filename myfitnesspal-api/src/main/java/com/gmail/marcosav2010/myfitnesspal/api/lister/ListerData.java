@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.gmail.marcosav2010.myfitnesspal.json.JSONObject;
+import com.gmail.marcosav2010.json.JSONObject;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -37,7 +37,7 @@ public class ListerData {
 
 	@Getter
 	private final Map<String, Object> allConfig = createMap();
-	
+
 	private void clear() {
 		exceptions.clear();
 		unitAliases.clear();
@@ -119,22 +119,25 @@ public class ListerData {
 	private void save(String name, Object config) {
 		allConfig.put(name, config);
 	}
-	
+
 	private void fillSet(Set<String> set, String name) {
 		save(name, set);
-		config.getJSONArray(name).forEach(e -> set.add(((String) e).toLowerCase()));
+		if (config.has(name))
+			config.getJSONArray(name).forEach(e -> set.add(((String) e).toLowerCase()));
 	}
 
 	@SuppressWarnings("unchecked")
 	private <V> void fillMap(Map<String, V> map, String name) {
 		save(name, map);
-		config.getJSONObject(name).toMap().forEach((k, v) -> map.put(k.toLowerCase(), (V) v));
+		if (config.has(name))
+			config.getJSONObject(name).toMap().forEach((k, v) -> map.put(k.toLowerCase(), (V) v));
 	}
 
 	@SuppressWarnings("unchecked")
 	private <V> void fillMultimap(Multimap<String, V> mmap, String name) {
 		save(name, mmap);
-		config.getJSONObject(name).toMap().forEach((k, v) -> mmap.putAll(k.toLowerCase(), (List<V>) v));
+		if (config.has(name))
+			config.getJSONObject(name).toMap().forEach((k, v) -> mmap.putAll(k.toLowerCase(), (List<V>) v));
 	}
 
 	private Set<String> createSet() {
