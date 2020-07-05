@@ -15,8 +15,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class FoodList {
 
-	private ListerData data;
-	private Collection<Meal> inputList;
+	private final ListerData data;
+	private final Collection<Meal> inputList;
 
 	private String removeEnd(Number n) {
 		return String.valueOf(n).replaceFirst("\\.0$", "");

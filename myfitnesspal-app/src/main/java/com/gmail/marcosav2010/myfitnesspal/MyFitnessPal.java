@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 import com.gmail.marcosav2010.myfitnesspal.api.MFPSession;
-import com.gmail.marcosav2010.myfitnesspal.api.lister.CustomFoodFormater;
+import com.gmail.marcosav2010.myfitnesspal.api.lister.CustomFoodFormatter;
 import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodList;
 import com.gmail.marcosav2010.myfitnesspal.api.lister.ListerData;
 
@@ -39,7 +39,7 @@ public class MyFitnessPal {
 	private static void generateList(String jsonSession, ListerData lc, String option, String day, String month, String year, String meals) throws IOException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
-		FoodList fl = new FoodList(lc, MFPSession.from(jsonSession).getDayFood(calendar.getTime(), meals, new CustomFoodFormater(lc)));
+		FoodList fl = new FoodList(lc, MFPSession.from(jsonSession).getDayFood(calendar.getTime(), meals, new CustomFoodFormatter(lc)));
 
 		String result;
 

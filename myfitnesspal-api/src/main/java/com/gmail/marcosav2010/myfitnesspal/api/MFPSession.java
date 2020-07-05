@@ -1,21 +1,12 @@
 package com.gmail.marcosav2010.myfitnesspal.api;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.gmail.marcosav2010.json.JSONArray;
+import com.gmail.marcosav2010.json.JSONException;
+import com.gmail.marcosav2010.json.JSONObject;
+import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodFormatter;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -23,228 +14,259 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.gmail.marcosav2010.json.JSONArray;
-import com.gmail.marcosav2010.json.JSONException;
-import com.gmail.marcosav2010.json.JSONObject;
-import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodFormater;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession {
 
-	private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
+    private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
-	private static DateFormat DATE_FORMAT = new SimpleDateFormat("yy-MM-dd");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yy-MM-dd");
 
-	private static String BASE_URL_SECURE = "https://www.myfitnesspal.com/";
-	private static String BASE_API_URL = "https://api.myfitnesspal.com/";
+    private static final String BASE_URL_SECURE = "https://www.myfitnesspal.com/";
+    private static final String BASE_API_URL = "https://api.myfitnesspal.com/";
 
-	private static String LOGIN_PATH = "account/login";
-	private static String USER_AUTH_DATA = "user/auth_token/?refresh=true";
-	private static String USER_METADATA = "v2/users/%s?";
-	private static String FOR_DATE = "food/diary/%s?date=%s";
+    private static final String LOGIN_PATH = "account/login";
+    private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
+    private static final String USER_METADATA = "v2/users/%s?";
+    private static final String FOR_DATE = "food/diary/%s?date=%s";
 
-	private static String LOGIN_URL = getURL(LOGIN_PATH);
+    private static final String LOGIN_URL = getURL(LOGIN_PATH);
 
-	private static String[] METADATA_QUERY_FIELDS = { "diary_preferences", "goal_preferences", "unit_preferences", "paid_subscriptions", "account",
-			"goal_displays", "location_preferences", "system_data", "profiles", "step_sources" };
+    private static final String[] METADATA_QUERY_FIELDS = {"diary_preferences", "goal_preferences", "unit_preferences",
+            "paid_subscriptions", "account", "goal_displays", "location_preferences", "system_data", "profiles",
+            "step_sources"};
 
-	private static FoodFormater DEFAULT_FF = (name, brand, unit, number) -> new Food(name, brand, unit, number);
+    private static final FoodFormatter DEFAULT_FF = Food::new;
 
-	private final Map<String, String> cookies = new HashMap<>();
+    private final Map<String, String> cookies = new HashMap<>();
 
-	private JSONObject authToken;
-	private JSONObject userMetadata;
+    private JSONObject authToken;
+    private JSONObject userMetadata;
 
-	@SuppressWarnings("unused")
-	private String authenticityToken, userId, accessToken, tokenType;
-	private JSONArray mealNames;
-	private Set<Integer> defaultMealIndexes = new HashSet<>();
+    @SuppressWarnings("unused")
+    private String authenticityToken, userId, accessToken, tokenType;
+    private JSONArray mealNames;
+    private final Set<Integer> defaultMealIndexes = new HashSet<>();
 
-	@Getter
-	private long creationTime;
+    @Getter
+    private long creationTime;
 
-	@Getter
-	private String username;
+    @Getter
+    private String username;
 
-	public String encode() {
-		JSONObject json = new JSONObject();
-		json.put("username", username);
-		json.put("creationTime", creationTime);
-		json.put("cookies", cookies);
-		json.put("mealNames", mealNames);
-		json.put("defaultMealIndexes", defaultMealIndexes);
-		return json.toString().replaceAll("\"", "__");
-	}
+    public String encode() {
+        JSONObject json = new JSONObject();
+        json.put("username", username);
+        json.put("creationTime", creationTime);
+        json.put("cookies", cookies);
+        json.put("mealNames", mealNames);
+        json.put("defaultMealIndexes", defaultMealIndexes);
+        return json.toString().replaceAll("\"", "__");
+    }
 
-	private void parse(String jsonString) {
-		JSONObject json = new JSONObject(jsonString.replaceAll("__", "\""));
-		username = json.getString("username");
-		creationTime = json.getLong("creationTime");
-		mealNames = json.getJSONArray("mealNames");
-		json.getJSONArray("defaultMealIndexes").toList().forEach(e -> defaultMealIndexes.add((Integer) e));
-		cookies.clear();
-		json.getJSONObject("cookies").toMap().forEach((k, v) -> cookies.put(k, (String) v));
-	}
+    private void parse(String jsonString) {
+        JSONObject json = new JSONObject(jsonString.replaceAll("__", "\""));
+        username = json.getString("username");
+        creationTime = json.getLong("creationTime");
+        mealNames = json.getJSONArray("mealNames");
+        json.getJSONArray("defaultMealIndexes").toList().forEach(e -> defaultMealIndexes.add((Integer) e));
+        cookies.clear();
+        json.getJSONObject("cookies").toMap().forEach((k, v) -> cookies.put(k, (String) v));
+    }
 
-	public boolean shouldRelog() {
-		return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_EXPIRATION_TIME;
-	}
+    public boolean shouldRelog() {
+        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_EXPIRATION_TIME;
+    }
 
-	private void login(String username, String password) throws IOException {
-		this.username = username;
+    private void login(String username, String password) throws IOException {
+        this.username = username;
 
-		Response res = Jsoup.connect(LOGIN_URL).method(Method.GET).execute();
-		Document doc = res.parse();
-		authenticityToken = doc.selectFirst("input[name='authenticity_token']").val();
-		res = Jsoup.connect(LOGIN_URL).data("username", username).data("password", password).method(Method.POST).execute();
-		cookies.putAll(res.cookies());
+        Response res = Jsoup.connect(LOGIN_URL).method(Method.GET).execute();
+        Document doc = res.parse();
+        authenticityToken = doc.selectFirst("input[name='authenticity_token']").val();
+        res = Jsoup.connect(LOGIN_URL).data("username", username).data("password", password).method(Method.POST).execute();
+        cookies.putAll(res.cookies());
 
-		try {
-			loadUserMetadata();
+        try {
+            loadUserMetadata();
 
-		} catch (JSONException ex) {
-			throw new RuntimeException("There was an error related to JSON, probably wrong user/password");
+        } catch (JSONException ex) {
+            throw new RuntimeException("There was an error related to JSON, probably wrong user/password");
 
-		} catch (IOException ex) {
-			throw new RuntimeException("There was an error while logging in: " + ex.getMessage());
-		}
-	}
+        } catch (IOException ex) {
+            throw new RuntimeException("There was an error while logging in: " + ex.getMessage());
+        }
+    }
 
-	private Set<Integer> getDefaultMeals() {
-		return defaultMealIndexes;
-	}
+    private Set<Integer> getDefaultMeals() {
+        return defaultMealIndexes;
+    }
 
-	private Set<Integer> parseMeals(String meals) {
-		meals = meals.replaceAll("[^-?0-9]+", "");
-		try {
-			return Stream.of(meals.trim().split("")).filter(n -> !n.isEmpty()).map(n -> Integer.parseInt(n)).collect(Collectors.toSet());
-		} catch (Exception ex) {
-			return getDefaultMeals();
-		}
-	}
+    private Set<Integer> parseMeals(String meals) {
+        meals = meals.replaceAll("[^-?0-9]+", "");
+        try {
+            return Stream.of(meals.trim().split("")).filter(n -> !n.isEmpty()).map(n -> Integer.parseInt(n)).collect(Collectors.toSet());
+        } catch (Exception ex) {
+            return getDefaultMeals();
+        }
+    }
 
-	public List<Meal> getDayFood(Date date) throws IOException {
-		return getDayFood(date, getDefaultMeals());
-	}
+    public List<Meal> getDayFood(Date date) throws IOException {
+        return getDayFood(date, getDefaultMeals());
+    }
 
-	public List<Meal> getDayFood(Date date, Set<Integer> meals) throws IOException {
-		return getDayFood(date, meals, DEFAULT_FF);
-	}
+    public List<Meal> getDayFood(Date date, Set<Integer> meals) throws IOException {
+        return getDayFood(date, meals, DEFAULT_FF);
+    }
 
-	public List<Meal> getDayFood(Date date, String meals) throws IOException {
-		return getDayFood(date, meals, DEFAULT_FF);
-	}
+    public List<Meal> getDayFood(Date date, String meals) throws IOException {
+        return getDayFood(date, meals, DEFAULT_FF);
+    }
 
-	public List<Meal> getDayFood(Date date, String meals, FoodFormater fa) throws IOException {
-		return getDayFood(date, parseMeals(meals), fa);
-	}
+    public List<Meal> getDayFood(Date date, String meals, FoodFormatter fa) throws IOException {
+        return getDayFood(date, parseMeals(meals), fa);
+    }
 
-	public List<Meal> getDayFood(Date date, FoodFormater fa) throws IOException {
-		return getDayFood(date, getDefaultMeals(), fa);
-	}
+    public List<Meal> getDayFood(Date date, FoodFormatter fa) throws IOException {
+        return getDayFood(date, getDefaultMeals(), fa);
+    }
 
-	public List<Meal> getDayFood(Date date, Set<Integer> requestedMeals, FoodFormater fa) throws IOException {
-		String foodDateURL = getURLForDate(date);
+    public List<Meal> getDayFood(Date date, Set<Integer> requestedMeals, FoodFormatter fa) throws IOException {
+        String foodDateURL = getURLForDate(date);
 
-		Document foodDoc = Jsoup.connect(foodDateURL).cookies(cookies).get();
-		Elements mealHeaders = foodDoc.getElementsByClass("meal_header");
+        Document foodDoc = Jsoup.connect(foodDateURL).cookies(cookies).get();
+        Elements mealHeaders = foodDoc.getElementsByClass("meal_header");
 
-		List<Meal> mealsList = new LinkedList<>();
-		int mealNo = 0;
+        List<Meal> mealsList = new LinkedList<>();
+        int mealNo = 0;
 
-		for (Element e : mealHeaders) {
-			if (!requestedMeals.contains(mealNo++))
-				continue;
+        for (Element e : mealHeaders) {
+            if (!requestedMeals.contains(mealNo++))
+                continue;
 
-			String mealTitle = e.selectFirst("td[class='first alt']").text();
-			Element cell = e.nextElementSibling();
+            String mealTitle = e.selectFirst("td[class='first alt']").text();
+            Element cell = e.nextElementSibling();
 
-			String[] foodContent, info, amount;
-			String name, brand, unit;
-			float number;
+            String[] foodContent, info, amount;
+            String name, brand, unit;
+            float number;
 
-			Meal meal = new Meal(mealTitle);
+            Meal meal = new Meal(mealTitle);
 
-			while (!cell.classNames().contains("bottom")) {
-				Element foodField = cell.selectFirst("a[class='js-show-edit-food']");
-				if (foodField == null)
-					break;
+            while (!cell.classNames().contains("bottom")) {
+                Element foodField = cell.selectFirst("a[class='js-show-edit-food']");
+                if (foodField == null)
+                    break;
 
-				foodContent = foodField.text().trim().split(", ");
-				info = foodContent[0].split(" - ");
-				name = info.length > 1 ? info[1] : info[0];
-				brand = info.length == 1 ? "" : info[0];
-				amount = foodContent[1].split("\\s+");
-				number = Float.parseFloat(amount[0]);
-				unit = amount[1];
+                foodContent = foodField.text().trim().split(", ");
+                info = foodContent[0].split(" - ");
+                name = info.length > 1 ? info[1] : info[0];
+                brand = info.length == 1 ? "" : info[0];
+                amount = foodContent[1].split("\\s+");
+                number = Float.parseFloat(amount[0]);
+                unit = amount[1];
 
-				Food food = fa.get(name, brand, unit, number);
+                Food food = fa.get(name, brand, unit, number);
 
-				meal.getFood().add(food);
+                meal.getFood().add(food);
 
-				cell = cell.nextElementSibling();
-			}
+                cell = cell.nextElementSibling();
+            }
 
-			mealsList.add(meal);
-		}
+            mealsList.add(meal);
+        }
 
-		return mealsList;
-	}
+        return mealsList;
+    }
 
-	private void loadUserMetadata() throws IOException {
-		authToken = new JSONObject(Jsoup.connect(getURL(USER_AUTH_DATA)).ignoreContentType(true).cookies(cookies).get().body().html());
+    public List<Meal> getDayRangeFood(Set<Date> dates, String requestedMeals, FoodFormatter fa) {
+        return getDayRangeFood(dates, parseMeals(requestedMeals), fa);
+    }
 
-		creationTime = System.currentTimeMillis();
-		userId = authToken.getString("user_id");
-		accessToken = authToken.getString("access_token");
-		tokenType = authToken.getString("token_type");
+    public List<Meal> getDayRangeFood(Set<Date> dates, Set<Integer> requestedMeals, FoodFormatter fa) {
+        return dates.stream().flatMap(d -> {
+            try {
+                return getDayFood(d, requestedMeals, fa).stream();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
+    }
 
-		String queryUrl = getApiURL(USER_METADATA, userId) + getFieldQueryURL("fields[]", METADATA_QUERY_FIELDS);
+    private void loadUserMetadata() throws IOException {
+        authToken = new JSONObject(Jsoup.connect(getURL(USER_AUTH_DATA))
+                .ignoreContentType(true)
+                .cookies(cookies)
+                .get()
+                .body()
+                .html());
 
-		userMetadata = new JSONObject(Jsoup.connect(queryUrl).ignoreContentType(true).header("Authorization", tokenType + " " + accessToken)
-				.header("mfp-client-id", "mfp-main-js").header("Accept", "application/json").header("mfp-user-id", userId).get().body().html());
+        creationTime = System.currentTimeMillis();
+        userId = authToken.getString("user_id");
+        accessToken = authToken.getString("access_token");
+        tokenType = authToken.getString("token_type");
 
-		mealNames = userMetadata.getJSONObject("item").getJSONObject("diary_preferences").getJSONArray("meal_names");
+        String queryUrl = getApiURL(USER_METADATA, userId) + getFieldQueryURL(METADATA_QUERY_FIELDS);
 
-		for (int i = 0; i < mealNames.length(); i++)
-			defaultMealIndexes.add(i);
-	}
+        userMetadata = new JSONObject(Jsoup.connect(queryUrl)
+                .ignoreContentType(true)
+                .header("Authorization", tokenType + " " + accessToken)
+                .header("mfp-client-id", "mfp-main-js")
+                .header("Accept", "application/json")
+                .header("mfp-user-id", userId)
+                .get()
+                .body()
+                .html());
 
-	private String getURLForDate(Date date) {
-		return getURL(FOR_DATE, username, DATE_FORMAT.format(date));
-	}
+        mealNames = userMetadata.getJSONObject("item").getJSONObject("diary_preferences").getJSONArray("meal_names");
 
-	private static String getFieldQueryURL(String field, String... args) throws UnsupportedEncodingException {
-		String queryFieldsUrl = "";
-		String fEnc = URLEncoder.encode(field, StandardCharsets.UTF_8.toString());
-		for (String f : args)
-			queryFieldsUrl += fEnc + "=" + f + "&";
-		queryFieldsUrl = queryFieldsUrl.substring(0, queryFieldsUrl.length() - 1);
+        for (int i = 0; i < mealNames.length(); i++)
+            defaultMealIndexes.add(i);
+    }
 
-		return queryFieldsUrl;
-	}
+    private String getURLForDate(Date date) {
+        return getURL(FOR_DATE, username, DATE_FORMAT.format(date));
+    }
 
-	private static String getURL(String path, Object... params) {
-		return BASE_URL_SECURE + String.format(path, params);
-	}
+    private static String getFieldQueryURL(String... args) throws UnsupportedEncodingException {
+        StringBuilder queryFieldsUrl = new StringBuilder();
+        String fEnc = URLEncoder.encode("fields[]", StandardCharsets.UTF_8.toString());
 
-	private static String getApiURL(String path, Object... params) {
-		return BASE_API_URL + String.format(path, params);
-	}
+        for (String f : args)
+            queryFieldsUrl.append(fEnc).append("=").append(f).append("&");
 
-	public static MFPSession create(String username, String password) throws IOException {
-		MFPSession s = new MFPSession();
-		s.login(username, password);
-		return s;
-	}
+        queryFieldsUrl = new StringBuilder(queryFieldsUrl.substring(0, queryFieldsUrl.length() - 1));
 
-	public static MFPSession from(String json) {
-		MFPSession s = new MFPSession();
-		s.parse(json);
-		return s;
-	}
+        return queryFieldsUrl.toString();
+    }
+
+    private static String getURL(String path, Object... params) {
+        return BASE_URL_SECURE + String.format(path, params);
+    }
+
+    private static String getApiURL(String path, Object... params) {
+        return BASE_API_URL + String.format(path, params);
+    }
+
+    public static MFPSession create(String username, String password) throws IOException {
+        MFPSession s = new MFPSession();
+        s.login(username, password);
+        return s;
+    }
+
+    public static MFPSession from(String json) {
+        MFPSession s = new MFPSession();
+        s.parse(json);
+        return s;
+    }
 }

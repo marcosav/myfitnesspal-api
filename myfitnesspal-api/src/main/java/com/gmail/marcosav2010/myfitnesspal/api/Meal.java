@@ -11,7 +11,7 @@ import lombok.Getter;
 public class Meal {
 
 	@Getter
-	private String name;
+	private final String name;
 	@Getter
 	private final List<Food> food = new LinkedList<>();
 }
