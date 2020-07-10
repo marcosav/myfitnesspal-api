@@ -1,91 +1,92 @@
 package com.gmail.marcosav2010.myfitnesspal.api.lister;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.gmail.marcosav2010.json.JSONArray;
 import com.gmail.marcosav2010.myfitnesspal.api.Food;
 import com.gmail.marcosav2010.myfitnesspal.api.Meal;
-
 import lombok.AllArgsConstructor;
+
+import java.util.*;
 
 @AllArgsConstructor
 public class FoodList {
 
-	private final ListerData data;
-	private final Collection<Meal> inputList;
+    private final ListerData data;
+    private final Collection<Meal> inputList;
 
-	private String removeEnd(Number n) {
-		return String.valueOf(n).replaceFirst("\\.0$", "");
-	}
+    private String removeEnd(Number n) {
+        return String.valueOf(n).replaceFirst("\\.0$", "");
+    }
 
-	private String getAmount(Food f) {
-		Double conv = data.getConversion(f.getName());
-		if (conv == null)
-			return removeEnd(f.getAmount()) + "" + f.getUnit() + " ";
+    private String getAmount(Food f) {
+        Double conversion;
+        try {
+            conversion = data.getConversion(f.getName());
+        } catch (NumberFormatException ex) {
+            return "[Unit error] ";
+        }
 
-		if (conv > 0)
-			return removeEnd(f.getAmount() / conv) + " ";
+        if (conversion == null)
+            return removeEnd(f.getAmount()) + "" + f.getUnit() + " ";
 
-		return "";
-	}
+        if (conversion > 0)
+            return removeEnd(f.getAmount() / conversion) + " ";
 
-	public Collection<Food> toFood(boolean buy) {
-		if (buy) {
-			Map<String, Food> out = new HashMap<>();
-			inputList.forEach(m -> m.getFood().forEach(f -> {
-				if (out.containsKey(f.getName())) {
-					out.get(f.getName()).add(f.getAmount());
-				} else
-					out.put(f.getName(), f);
-			}));
+        return "";
+    }
 
-			return out.values();
+    public Collection<Food> toFood(boolean buy) {
+        if (buy) {
+            Map<String, Food> out = new HashMap<>();
+            inputList.forEach(m -> m.getFood().forEach(f -> {
+                if (out.containsKey(f.getName())) {
+                    out.get(f.getName()).add(f.getAmount());
+                } else
+                    out.put(f.getName(), f);
+            }));
 
-		} else {
-			List<Food> out = new LinkedList<>();
-			inputList.forEach(m -> out.addAll(m.getFood()));
-			return out;
-		}
-	}
+            return out.values();
 
-	public List<String> toList(boolean buy) {
-		List<String> out = new LinkedList<>();
+        } else {
+            List<Food> out = new LinkedList<>();
+            inputList.forEach(m -> out.addAll(m.getFood()));
+            return out;
+        }
+    }
 
-		toFood(buy).forEach(f -> {
-			String alias = f.getName();
-			String q = "";
+    public List<String> toList(boolean buy) {
+        List<String> out = new LinkedList<>();
 
-			if (buy) {
-				if (!data.isException(alias)) {
-					q = data.isMeasured(alias) ? getAmount(f) : "";
-					out.add(q + alias);
-				}
-			} else {
-				String o = "";
+        toFood(buy).forEach(f -> {
+            String alias = f.getName();
+            String q = "";
 
-				if (data.isSacar(alias))
-					o = "Sacar ";
-				else if (data.isPesar(alias))
-					o = "";
-				else if (data.isPicar(alias))
-					o = "Picar ";
-				else
-					return;
+            if (buy) {
+                if (!data.isException(alias)) {
+                    q = data.isMeasured(alias) ? getAmount(f) : "";
+                    out.add(q + alias);
+                }
+            } else {
+                String o = "";
 
-				q = getAmount(f);
+                if (data.isSacar(alias))
+                    o = "Sacar ";
+                else if (data.isPesar(alias))
+                    o = "";
+                else if (data.isPicar(alias))
+                    o = "Picar ";
+                else
+                    return;
 
-				out.add(o + q + alias);
-			}
-		});
+                q = getAmount(f);
 
-		return out;
-	}
+                out.add(o + q + alias);
+            }
+        });
 
-	public String toJSON(boolean buy) {
-		return new JSONArray(toList(buy)).toString();
-	}
+        return out;
+    }
+
+    public String toJSON(boolean buy) {
+        return new JSONArray(toList(buy)).toString();
+    }
 }

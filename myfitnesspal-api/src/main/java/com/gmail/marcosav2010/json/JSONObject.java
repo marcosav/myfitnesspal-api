@@ -4,18 +4,18 @@ import java.io.Closeable;
 
 /*
  * Copyright (c) 2002 JSON.org
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
  * including without limitation the rights to use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * The Software shall be used for Good, not Evil.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -33,15 +33,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -283,6 +276,33 @@ public class JSONObject {
 	}
 
 	/**
+	 * Construct a JSONObject from a SortedMap.
+	 *
+	 * @param m
+	 *            A ordered map object that can be used to initialize the contents of the JSONObject.
+	 * @throws JSONException
+	 *             If a value in the map is non-finite number.
+	 * @throws NullPointerException
+	 *             If a key in the map is <code>null</code>
+	 */
+	public JSONObject(SortedMap<String, ?> m) {
+		if (m == null) {
+			this.map = new TreeMap<>();
+		} else {
+			this.map = new TreeMap<>(m.comparator());
+			for (final Entry<?, ?> e : m.entrySet()) {
+				if (e.getKey() == null) {
+					throw new NullPointerException("Null key.");
+				}
+				final Object value = e.getValue();
+				if (value != null) {
+					this.map.put(String.valueOf(e.getKey()), wrap(value));
+				}
+			}
+		}
+	}
+
+	/**
 	 * Construct a JSONObject from an Object using bean getters. It reflects on all of the public
 	 * methods of the object. For each of the methods with no parameters and a name starting with
 	 * <code>"get"</code> or <code>"is"</code> followed by an uppercase letter, the method is invoked,
@@ -301,27 +321,27 @@ public class JSONObject {
 	 * The {@link JSONPropertyName} annotation can be used on a bean getter to override key name used in
 	 * the JSONObject. For example, using the object above with the <code>getName</code> method, if we
 	 * annotated it with:
-	 * 
+	 *
 	 * <pre>
 	 * &#64;JSONPropertyName("FullName")
 	 * public String getName() {
 	 * 	return this.name;
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * The resulting JSON object would contain <code>"FullName": "Larry Fine"</code>
 	 * <p>
 	 * Similarly, the {@link JSONPropertyName} annotation can be used on non- <code>get</code> and
 	 * <code>is</code> methods. We can also override key name used in the JSONObject as seen below even
 	 * though the field would normally be ignored:
-	 * 
+	 *
 	 * <pre>
 	 * &#64;JSONPropertyName("FullName")
 	 * public String fullName() {
 	 * 	return this.name;
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * The resulting JSON object would contain <code>"FullName": "Larry Fine"</code>
 	 * <p>
 	 * The {@link JSONPropertyIgnore} annotation can be used to force the bean property to not be
@@ -331,7 +351,7 @@ public class JSONObject {
 	 * {@link JSONPropertyIgnore} annotation takes precedent and the field is not serialized. For
 	 * example, the following declaration would prevent the <code>getName</code> method from being
 	 * serialized:
-	 * 
+	 *
 	 * <pre>
 	 * &#64;JSONPropertyName("FullName")
 	 * &#64;JSONPropertyIgnore
@@ -340,7 +360,7 @@ public class JSONObject {
 	 * }
 	 * </pre>
 	 * <p>
-	 * 
+	 *
 	 * @param bean
 	 *            An object that has getter methods that should be used to make a JSONObject.
 	 */
@@ -431,7 +451,7 @@ public class JSONObject {
 	/**
 	 * Constructor to specify an initial capacity of the internal map. Useful for library internal calls
 	 * where we know, or at least can best guess, how big this JSONObject will be.
-	 * 
+	 *
 	 * @param initialCapacity
 	 *            initial capacity of the internal map.
 	 */
@@ -548,7 +568,7 @@ public class JSONObject {
 
 	/**
 	 * Get the enum value associated with a key.
-	 * 
+	 *
 	 * @param <E>
 	 *            Enum Type
 	 * @param clazz
@@ -888,7 +908,7 @@ public class JSONObject {
 	 * JSONObject. Use with caution.
 	 *
 	 * @see Set#iterator()
-	 * 
+	 *
 	 * @return An iterator of the keys.
 	 */
 	public Iterator<String> keys() {
@@ -912,7 +932,7 @@ public class JSONObject {
 	 * by the JSONObject get* and opt* functions. Modifying the returned EntrySet or the Entry objects
 	 * contained therein will modify the backing JSONObject. This does not return a clone or a read-only
 	 * view.
-	 * 
+	 *
 	 * Use with caution.
 	 *
 	 * @see Map#entrySet()
@@ -995,7 +1015,7 @@ public class JSONObject {
 
 	/**
 	 * Get the enum value associated with a key.
-	 * 
+	 *
 	 * @param <E>
 	 *            Enum Type
 	 * @param clazz
@@ -1010,7 +1030,7 @@ public class JSONObject {
 
 	/**
 	 * Get the enum value associated with a key.
-	 * 
+	 *
 	 * @param <E>
 	 *            Enum Type
 	 * @param clazz
@@ -1738,6 +1758,24 @@ public class JSONObject {
 	}
 
 	/**
+	 * Put a ordered key/value pair in the JSONObject, where the value will be a JSONObject which is produced
+	 * from a ordered SortedMap.
+	 *
+	 * @param key
+	 *            A key string.
+	 * @param value
+	 *            A SortedMap value.
+	 * @return this.
+	 * @throws JSONException
+	 *             If the value is non-finite number.
+	 * @throws NullPointerException
+	 *             If the key is <code>null</code>.
+	 */
+	public JSONObject put(String key, SortedMap<String, ?> value) throws JSONException {
+		return this.put(key, new JSONObject(value));
+	}
+
+	/**
 	 * Put a key/value pair in the JSONObject. If the value is <code>null</code>, then the key will be
 	 * removed from the JSONObject if it is present.
 	 *
@@ -1809,22 +1847,22 @@ public class JSONObject {
 	/**
 	 * Creates a JSONPointer using an initialization string and tries to match it to an item within this
 	 * JSONObject. For example, given a JSONObject initialized with this document:
-	 * 
+	 *
 	 * <pre>
 	 * {
 	 *     "a":{"b":"c"}
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * and this JSONPointer string:
-	 * 
+	 *
 	 * <pre>
 	 * "/a/b"
 	 * </pre>
-	 * 
+	 *
 	 * Then this method will return the String "c". A JSONPointerException may be thrown from code
 	 * called by this method.
-	 * 
+	 *
 	 * @param jsonPointer
 	 *            string that can be used to create a JSONPointer
 	 * @return the item matched by the JSONPointer, otherwise null
@@ -1836,22 +1874,22 @@ public class JSONObject {
 	/**
 	 * Uses a user initialized JSONPointer and tries to match it to an item within this JSONObject. For
 	 * example, given a JSONObject initialized with this document:
-	 * 
+	 *
 	 * <pre>
 	 * {
 	 *     "a":{"b":"c"}
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * and this JSONPointer:
-	 * 
+	 *
 	 * <pre>
 	 * "/a/b"
 	 * </pre>
-	 * 
+	 *
 	 * Then this method will return the String "c". A JSONPointerException may be thrown from code
 	 * called by this method.
-	 * 
+	 *
 	 * @param jsonPointer
 	 *            string that can be used to create a JSONPointer
 	 * @return the item matched by the JSONPointer, otherwise null
@@ -1863,7 +1901,7 @@ public class JSONObject {
 	/**
 	 * Queries and returns a value from this object using {@code jsonPointer}, or returns null if the
 	 * query fails due to a missing key.
-	 * 
+	 *
 	 * @param jsonPointer
 	 *            the string representation of the JSON pointer
 	 * @return the queried value or {@code null}
@@ -1877,7 +1915,7 @@ public class JSONObject {
 	/**
 	 * Queries and returns a value from this object using {@code jsonPointer}, or returns null if the
 	 * query fails due to a missing key.
-	 * 
+	 *
 	 * @param jsonPointer
 	 *            The JSON pointer
 	 * @return the queried value or {@code null}
@@ -2028,7 +2066,7 @@ public class JSONObject {
 
 	/**
 	 * Tests if the value should be tried as a decimal. It makes no test if there are actual digits.
-	 * 
+	 *
 	 * @param val
 	 *            value to test
 	 * @return true if the string is "-0" or if it contains '.', 'e', or 'E', false otherwise.
@@ -2041,7 +2079,7 @@ public class JSONObject {
 	 * Converts a string to a number using the narrowest possible type. Possible returns for this
 	 * function are BigDecimal, Double, BigInteger, Long, and Integer. When a Double is returned, it
 	 * should always be a valid Double and not NaN or +-infinity.
-	 * 
+	 *
 	 * @param val
 	 *            value to convert
 	 * @return Number representation of the value.
@@ -2210,7 +2248,7 @@ public class JSONObject {
 	 * result in a syntactically correct JSON text, then null will be returned instead.
 	 * <p>
 	 * <b> Warning: This method assumes that the data structure is acyclical. </b>
-	 * 
+	 *
 	 * @return a printable, displayable, portable, transmittable representation of the object, beginning
 	 *         with <code>{</code>&nbsp;<small>(left brace)</small> and ending with
 	 *         <code>}</code>&nbsp;<small>(right brace)</small>.
@@ -2226,15 +2264,15 @@ public class JSONObject {
 
 	/**
 	 * Make a pretty-printed JSON text of this JSONObject.
-	 * 
+	 *
 	 * <p>
 	 * If <code>indentFactor > 0</code> and the {@link JSONObject} has only one key, then the object
 	 * will be output on a single line:
-	 * 
+	 *
 	 * <pre>
 	 * {@code {"key": 1}}
 	 * </pre>
-	 * 
+	 *
 	 * <p>
 	 * If an object has 2 or more keys, then it will be output across multiple lines: <code><pre>{
 	 *  "key1": 1,
@@ -2337,7 +2375,7 @@ public class JSONObject {
 	 * added.
 	 * <p>
 	 * <b> Warning: This method assumes that the data structure is acyclical. </b>
-	 * 
+	 *
 	 * @return The writer.
 	 * @throws JSONException
 	 */
@@ -2396,15 +2434,15 @@ public class JSONObject {
 
 	/**
 	 * Write the contents of the JSONObject as JSON text to a writer.
-	 * 
+	 *
 	 * <p>
 	 * If <code>indentFactor > 0</code> and the {@link JSONObject} has only one key, then the object
 	 * will be output on a single line:
-	 * 
+	 *
 	 * <pre>
 	 * {@code {"key": 1}}
 	 * </pre>
-	 * 
+	 *
 	 * <p>
 	 * If an object has 2 or more keys, then it will be output across multiple lines: <code><pre>{
 	 *  "key1": 1,
@@ -2505,7 +2543,7 @@ public class JSONObject {
 
 	/**
 	 * Create a new JSONException in a common format for incorrect conversions.
-	 * 
+	 *
 	 * @param key
 	 *            name of the key
 	 * @param valueType
@@ -2520,7 +2558,7 @@ public class JSONObject {
 
 	/**
 	 * Create a new JSONException in a common format for incorrect conversions.
-	 * 
+	 *
 	 * @param key
 	 *            name of the key
 	 * @param valueType
