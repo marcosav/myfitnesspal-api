@@ -7,6 +7,7 @@ import com.gmail.marcosav2010.myfitnesspal.api.lister.FoodFormatter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jsoup.Connection;
 import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession {
 
+    private static final int TIMEOUT = 10 * 1000;
     private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yy-MM-dd");
@@ -90,7 +92,11 @@ public class MFPSession {
     private void login(String username, String password) throws IOException {
         this.username = username;
 
-        Response res = Jsoup.connect(LOGIN_URL).method(Method.GET).execute();
+        Response res = Jsoup.connect(LOGIN_URL)
+                .timeout(TIMEOUT)
+                .method(Method.GET)
+                .execute();
+
         Document doc = res.parse();
         authenticityToken = doc.selectFirst("input[name='authenticity_token']").val();
         res = Jsoup.connect(LOGIN_URL).data("username", username).data("password", password).method(Method.POST).execute();
@@ -114,7 +120,10 @@ public class MFPSession {
     private Set<Integer> parseMeals(String meals) {
         meals = meals.replaceAll("[^-?0-9]+", "");
         try {
-            return Stream.of(meals.trim().split("")).filter(n -> !n.isEmpty()).map(n -> Integer.parseInt(n)).collect(Collectors.toSet());
+            return Stream.of(meals.trim().split(""))
+                    .filter(n -> !n.isEmpty())
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toSet());
         } catch (Exception ex) {
             return getDefaultMeals();
         }
@@ -204,31 +213,48 @@ public class MFPSession {
     }
 
     private void loadUserMetadata() throws IOException {
-        authToken = new JSONObject(Jsoup.connect(getURL(USER_AUTH_DATA))
+        Connection c = Jsoup.connect(getURL(USER_AUTH_DATA))
+                .timeout(TIMEOUT)
                 .ignoreContentType(true)
                 .cookies(cookies)
-                .get()
+                .method(Method.GET);
+
+        String content = c
+                .execute()
+                .parse()
                 .body()
-                .html());
+                .html();
+
+        authToken = new JSONObject(content);
 
         creationTime = System.currentTimeMillis();
         userId = authToken.getString("user_id");
         accessToken = authToken.getString("access_token");
         tokenType = authToken.getString("token_type");
 
-        String queryUrl = getApiURL(USER_METADATA, userId) + getFieldQueryURL(METADATA_QUERY_FIELDS);
+        String queryUrl = getApiURL(userId) + getFieldQueryURL(METADATA_QUERY_FIELDS);
 
-        userMetadata = new JSONObject(Jsoup.connect(queryUrl)
+        c = Jsoup.connect(queryUrl)
+                .timeout(TIMEOUT)
                 .ignoreContentType(true)
                 .header("Authorization", tokenType + " " + accessToken)
                 .header("mfp-client-id", "mfp-main-js")
                 .header("Accept", "application/json")
                 .header("mfp-user-id", userId)
-                .get()
-                .body()
-                .html());
+                .method(Method.GET);
 
-        mealNames = userMetadata.getJSONObject("item").getJSONObject("diary_preferences").getJSONArray("meal_names");
+        content = c
+                .execute()
+                .parse()
+                .body()
+                .html();
+
+        userMetadata = new JSONObject(content);
+
+        mealNames = userMetadata
+                .getJSONObject("item")
+                .getJSONObject("diary_preferences")
+                .getJSONArray("meal_names");
 
         for (int i = 0; i < mealNames.length(); i++)
             defaultMealIndexes.add(i);
@@ -254,8 +280,8 @@ public class MFPSession {
         return BASE_URL_SECURE + String.format(path, params);
     }
 
-    private static String getApiURL(String path, Object... params) {
-        return BASE_API_URL + String.format(path, params);
+    private static String getApiURL(Object... params) {
+        return BASE_API_URL + String.format(MFPSession.USER_METADATA, params);
     }
 
     public static MFPSession create(String username, String password) throws IOException {

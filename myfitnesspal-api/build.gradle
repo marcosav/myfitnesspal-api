@@ -6,9 +6,9 @@ dependencies {
     implementation 'com.google.guava:guava:27.0.1-jre'
 
     //testImplementation 'junit:junit:4.12'
-    
-    implementation 'org.jsoup:jsoup:1.12.1'
-    
-    compileOnly "org.projectlombok:lombok:1.18.12"
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+
+    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
 }

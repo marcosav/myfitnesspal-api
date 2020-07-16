@@ -54,9 +54,13 @@ public class FoodList {
     }
 
     public List<String> toList(boolean buy) {
+        return toList(toFood(buy), buy);
+    }
+
+    public List<String> toList(Collection<Food> foodList, boolean buy) {
         List<String> out = new LinkedList<>();
 
-        toFood(buy).forEach(f -> {
+        foodList.forEach(f -> {
             String alias = f.getName();
             String q = "";
 
