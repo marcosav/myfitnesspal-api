@@ -1,4 +1,4 @@
 rootProject.name = 'myfitnesspal'
 
-include 'myfitnesspal-app'
+include 'myfitnesspal-cli'
 include 'myfitnesspal-api'
