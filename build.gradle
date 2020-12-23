@@ -1,5 +1,5 @@
 group 'com.gmail.marcosav2010'
-version '0.1.2'
+version '0.2'
 
 subprojects {
     apply plugin: 'java'
@@ -18,11 +18,11 @@ subprojects {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/marcosav/myfitnesspal")
+                url = uri("https://maven.pkg.github.com/marcosav/myfitnesspal-api")
 
                 credentials {
-                    username = project.findProperty("gpr.user")
-                    password = project.findProperty("gpr.key")
+                    username = findProperty("gpr.user")
+                    password = findProperty("gpr.key")
                 }
             }
         }

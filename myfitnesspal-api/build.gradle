@@ -1,7 +1,5 @@
 dependencies {
-    implementation group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
-
-    //testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
 
