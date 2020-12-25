@@ -21,7 +21,6 @@ public class MFPSession implements IMFPSession {
     private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
     private static final String LOGIN_PATH = "account/login";
-    private static final String LOGOUT_PATH = "account/logout";
     private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
 
     /*private static final String NUTRIENT_GOALS_DATA = "nutrient-goals?date=%s";
@@ -34,7 +33,6 @@ public class MFPSession implements IMFPSession {
     private UserData userData;
     private Diary diary;
 
-    @SuppressWarnings("unused")
     private String userId;
 
     @Getter
@@ -125,10 +123,6 @@ public class MFPSession implements IMFPSession {
 
     public Diary toDiary() {
         return diary;
-    }
-
-    public void logout() throws IOException {
-        fetcher.json(fetcher.getURL(LOGOUT_PATH));
     }
 
     public static IMFPSession create(String username, String password) throws IOException {

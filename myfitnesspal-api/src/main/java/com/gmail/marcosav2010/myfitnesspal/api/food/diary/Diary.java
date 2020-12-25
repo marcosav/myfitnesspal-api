@@ -19,13 +19,10 @@ public class Diary {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final String DIARY_DATA = "diary?%s=all&entry_date=%s&types=%s";
-    //private static final String FOOD_FOR_DATE = "food/diary/%s?date=%s";
     private static final String FOOD_NOTE_FOR_DATE = "food/note/%s?date=%s";
     private static final String FOOD_WATER_FOR_DATE = "food/water/%s?date=%s";
 
     public static final String WATER = "water", NOTES = "notes";
-
-    //private static final Set<String> MACROS = new HashSet<>(Arrays.asList("carbohydrates", "fat", "protein"));
 
     private static final String FOOD_ENTRY = "food_entry", DIARY_MEAL = "diary_meal";
     private static final String[] DIARY_QUERY_TYPES = {
@@ -138,72 +135,6 @@ public class Diary {
             }
         }
 
-        /*String url = getURLForDate(FOOD_FOR_DATE, date);
-
-        Document foodDoc = fetcher.connect(url).get();
-        Elements mealHeaders = foodDoc.getElementsByClass("meal_header");
-
-        String notes = "";
-        int water = 0;
-        List<DiaryMeal> mealsList = new LinkedList<>();
-        int mealNo = 0;
-
-        for (Element e : mealHeaders) {
-            if (!requestedMeals.contains(mealNo++))
-                continue;
-
-            String mealTitle = e.selectFirst("td[class='first alt']").text();
-            Element cell = e.nextElementSibling();
-
-            String[] foodContent, info, amount;
-            String name, brand, unit;
-            float number;
-            long entryId;
-            int calories = 0;
-
-            DiaryMeal meal = new DiaryMeal(mealNo, mealTitle);
-
-            while (!cell.classNames().contains("bottom")) {
-                Element foodField = cell.selectFirst("a[class='js-show-edit-food']");
-                if (foodField == null)
-                    break;
-
-                entryId = Long.parseLong(foodField.attr("data-food-entry-id"));
-                foodContent = foodField.text().trim().split(", ");
-                info = foodContent[0].split(" - ");
-                name = info.length > 1 ? info[1] : info[0];
-                brand = info.length == 1 ? "" : info[0];
-                amount = foodContent[1].split("\\s+");
-                number = Float.parseFloat(amount[0]);
-                unit = amount[1];
-
-                Map<String, Integer> values = new LinkedHashMap<>();
-                Element valueField;
-                int i = 2;
-                for (Object n : userData.getTrackedNutrients()) {
-                    valueField = cell.selectFirst("td:nth-child(" + i++ + ")" +
-                            (isMacro(n.toString()) ? " span.macro-value" : ""));
-
-                    int value = Integer.parseInt(valueField.text().replaceAll(",", ""));
-
-                    if (i == 3) {
-                        calories = value;
-                        continue;
-                    }
-
-                    values.put(n.toString(), value);
-                }
-
-                DiaryFood food = new DiaryFood(entryId, name, brand, unit, number, calories, values);
-
-                meal.getFood().add(food);
-
-                cell = cell.nextElementSibling();
-            }
-
-            mealsList.add(meal);
-        }*/
-
         String notes = "";
         int water = 0;
 
@@ -216,10 +147,6 @@ public class Diary {
 
         return new FoodDay(date, new ArrayList<>(meals.values()), water, notes);
     }
-
-    /*private boolean isMacro(String nutrient) {
-        return MACROS.contains(nutrient.toLowerCase());
-    }*/
 
     private Map<String, Float> getValues(JSONObject ne) {
         Map<String, Float> values = new LinkedHashMap<>();

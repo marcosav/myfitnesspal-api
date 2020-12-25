@@ -24,6 +24,10 @@ public class UserData {
     private String username;
     @Getter
     private String email;
+    @Getter
+    private String userId;
+    @Getter
+    private JSONObject locationPreferences;
 
     public UserData(JSONObject metadata) {
         userMetadata = metadata;
@@ -45,6 +49,9 @@ public class UserData {
 
         username = userMetadata.getString("username");
         email = userMetadata.getString("email");
+        userId = userMetadata.getString("id");
+
+        locationPreferences = userMetadata.getJSONObject("location_preferences");
     }
 
     public List<String> getMealNames() {

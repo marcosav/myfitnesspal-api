@@ -1,5 +1,5 @@
 group 'com.gmail.marcosav2010'
-version '0.2'
+version '0.2.1'
 
 subprojects {
     apply plugin: 'java'
