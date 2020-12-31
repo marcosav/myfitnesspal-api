@@ -1,15 +1,19 @@
-package com.gmail.marcosav2010.myfitnesspal.api.food.diary;
+package com.gmail.marcosav2010.myfitnesspal.api.diary.food;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.*;
 
 @ToString
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor
 public class DiaryMeal {
 
     @Getter
     private final int index;
+    @NonNull
     @Getter
     private final String name;
 

@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.myfitnesspal.api.food;
+package com.gmail.marcosav2010.myfitnesspal.api.diary.food;
 
 public class FoodValues {
 

@@ -1,10 +1,12 @@
 package com.gmail.marcosav2010.myfitnesspal.api;
 
-import com.gmail.marcosav2010.myfitnesspal.api.food.FoodValues;
-import com.gmail.marcosav2010.myfitnesspal.api.food.diary.Diary;
-import com.gmail.marcosav2010.myfitnesspal.api.food.diary.DiaryFood;
-import com.gmail.marcosav2010.myfitnesspal.api.food.diary.DiaryMeal;
-import com.gmail.marcosav2010.myfitnesspal.api.food.diary.FoodDay;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.Day;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.Diary;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.exercise.CardioExercise;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.exercise.StrengthExercise;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.food.DiaryFood;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.food.DiaryMeal;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.food.FoodValues;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserData;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +53,10 @@ public class TestMFPSession {
         c.set(2020, Calendar.DECEMBER, 20);
         Date date = c.getTime();
 
-        FoodDay result = diary.getDay(date);
+        Day result = diary.getFullDay(date);
+
+        assertEquals("", result.getExerciseNote());
+        assertEquals("hi test", result.getFoodNotes());
 
         assertEquals(4, result.getMeals().size());
 
@@ -78,22 +83,26 @@ public class TestMFPSession {
         assertEquals(16.2, food.get(FoodValues.SUGAR), DELTA);
         assertEquals(2, food.get(FoodValues.PROTEIN), DELTA);
 
+        assertEquals(2, result.getCardioExercises().size());
+        assertEquals(1, result.getStrengthExercises().size());
+
         c.set(2020, Calendar.DECEMBER, 22);
         date = c.getTime();
-        result = diary.getDay(date, "2", Diary.NOTES, Diary.WATER);
+        result = diary.getDay(date, Diary.FOOD, Diary.FOOD_NOTES, Diary.WATER);
 
-        assertEquals("hi test", result.getNotes());
+        assertEquals("", result.getExerciseNote());
+        assertEquals("hi test", result.getFoodNotes());
         assertEquals(48, result.getWater());
 
-        String notes = diary.getNotes(date);
+        String foodNotes = diary.getFoodNotes(date);
         int water = diary.getWater(date);
 
-        assertEquals("hi test", notes);
+        assertEquals("hi test", foodNotes);
         assertEquals(48, water);
 
-        assertEquals(1, result.getMeals().size());
+        assertEquals(4, result.getMeals().size());
 
-        DiaryMeal dinner = result.getMeals().get(0);
+        DiaryMeal dinner = result.getMeals().get(2);
 
         assertEquals(3, dinner.getFood().size());
         assertEquals(2, dinner.getIndex());
@@ -109,5 +118,33 @@ public class TestMFPSession {
         assertEquals(0, dinner.get(FoodValues.FIBER), DELTA);
         assertEquals(10.1, dinner.get(FoodValues.SUGAR), DELTA);
         assertEquals(34, dinner.get(FoodValues.PROTEIN), DELTA);
+
+        assertEquals(0, result.getCardioExercises().size());
+        assertEquals(0, result.getStrengthExercises().size());
+
+        c.set(2020, Calendar.DECEMBER, 28);
+        date = c.getTime();
+        result = diary.getDay(date, Diary.EXERCISE, Diary.EXERCISE_NOTES);
+
+        assertEquals("", result.getFoodNotes());
+        assertEquals("ads", result.getExerciseNote());
+        assertEquals(0, result.getWater());
+
+        assertEquals(0, result.getMeals().size());
+
+        assertEquals(3, result.getCardioExercises().size());
+        assertEquals(2, result.getStrengthExercises().size());
+
+        CardioExercise cardioExercise = result.getCardioExercises().get(2);
+        assertEquals(13 * 60, cardioExercise.getDuration());
+        assertEquals(2, cardioExercise.getEnergy());
+        assertEquals("Running (jogging), up stairs", cardioExercise.getName());
+
+        StrengthExercise strengthExercise = result.getStrengthExercises().get(1);
+        assertEquals(8, strengthExercise.getRepetitions());
+        assertEquals(4, strengthExercise.getSets());
+        assertEquals(32, strengthExercise.getQuantity());
+        assertEquals(81.2, strengthExercise.getWeight(), DELTA);
+        assertEquals("Bench Press, Barbell", strengthExercise.getName());
     }
 }
