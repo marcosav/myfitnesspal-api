@@ -2,7 +2,7 @@ package com.gmail.marcosav2010.myfitnesspal.api;
 
 import com.gmail.marcosav2010.json.JSONException;
 import com.gmail.marcosav2010.json.JSONObject;
-import com.gmail.marcosav2010.myfitnesspal.api.food.diary.Diary;
+import com.gmail.marcosav2010.myfitnesspal.api.diary.Diary;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserData;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserFetcher;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ public class MFPSession implements IMFPSession {
     private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
 
     /*private static final String NUTRIENT_GOALS_DATA = "nutrient-goals?date=%s";
-    private static final String MEASUREMENTS_DATA = "incubator/measurements?entry_date=%s";*/
+    private static final String MEASUREMENTS_DATA = "incubator/measurements?entry_date=%s"; //most_recent=true */
 
     private BaseFetcher fetcher = new BaseFetcher();
 
