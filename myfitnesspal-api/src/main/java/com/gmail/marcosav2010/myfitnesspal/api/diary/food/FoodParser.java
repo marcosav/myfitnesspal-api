@@ -25,7 +25,7 @@ public class FoodParser {
         String id = fe.getString("id");
         String[] desc = fe.getString("description").split(" - ");
         String brand = "";
-        if (fe.get("brand_ame") != JSONObject.NULL)
+        if (fe.get("brand_name") != JSONObject.NULL)
             brand = fe.getString("brand_name");
 
         String name = desc.length > 1 ? desc[1] : desc[0];
