@@ -1,6 +1,5 @@
 package com.gmail.marcosav2010.myfitnesspal.api;
 
-import com.gmail.marcosav2010.json.JSONException;
 import com.gmail.marcosav2010.json.JSONObject;
 import com.gmail.marcosav2010.myfitnesspal.api.diary.Diary;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserData;
@@ -20,7 +19,8 @@ public class MFPSession implements IMFPSession {
 
     private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
-    private static final String LOGIN_PATH = "account/login";
+    private static final String CSRF_PATH = "api/auth/csrf";
+    private static final String LOGIN_PATH = "api/auth/callback/credentials";
     private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
 
     /*private static final String NUTRIENT_GOALS_DATA = "nutrient-goals?date=%s";
@@ -28,6 +28,7 @@ public class MFPSession implements IMFPSession {
 
     private BaseFetcher fetcher = new BaseFetcher();
 
+    private final String CSRF_URL = fetcher.getURL(CSRF_PATH);
     private final String LOGIN_URL = fetcher.getURL(LOGIN_PATH);
 
     private UserData userData;
@@ -63,23 +64,20 @@ public class MFPSession implements IMFPSession {
     }
 
     private void login(String username, String password) throws IOException {
-        String authenticityToken = fetcher.findAuthenticityToken(fetcher.connect(LOGIN_URL).get());
+        String csrfToken = fetcher.getCsrfToken(CSRF_URL);
 
         Map<String, String> credentials = new HashMap<>();
 
         credentials.put("username", username);
         credentials.put("password", password);
-        credentials.put("authenticity_token", authenticityToken);
+        credentials.put("csrfToken", csrfToken);
 
-        fetcher.login(LOGIN_URL, credentials);
+        if (!fetcher.login(LOGIN_URL, credentials))
+            throw new RuntimeException("Wrong user/password");
 
         try {
             authenticate();
-
-        } catch (JSONException ex) {
-            throw new RuntimeException("There was an error related to JSON, probably wrong user/password", ex);
-
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("There was an error while logging in: " + ex.getMessage(), ex);
         }
     }

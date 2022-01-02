@@ -73,7 +73,7 @@ public class Diary {
      * @return a Day populated with the requested data
      * @throws IOException when there was any kind of error connecting to myfitnesspal, such as expired session
      */
-    public Day getDay(Date date, Byte param, Byte... params) throws IOException {
+    public synchronized Day getDay(Date date, Byte param, Byte... params) throws IOException {
         Set<Byte> ps = Stream.of(params).collect(Collectors.toSet());
         if (param != null)
             ps.add(param);

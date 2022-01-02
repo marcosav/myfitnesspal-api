@@ -1,44 +1,21 @@
 group 'com.gmail.marcosav2010'
-version '0.3'
+version '0.3.2'
 
 subprojects {
     apply plugin: 'java'
     apply plugin: "maven-publish"
 
-    repositories {
-        jcenter()
-    }
-
     compileJava {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
-
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/marcosav/myfitnesspal-api")
-
-                credentials {
-                    username = findProperty("gpr.user")
-                    password = findProperty("gpr.key")
-                }
-            }
-        }
-
-        publications {
-            gpr(MavenPublication) {
-                group rootProject.group
-                version rootProject.version
-
-                from components.java
-            }
-        }
-    }
 }
 
 allprojects {
+    repositories {
+        mavenCentral()
+    }
+
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
             options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"

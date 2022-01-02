@@ -4,6 +4,7 @@ import com.gmail.marcosav2010.json.JSONObject;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -42,45 +43,59 @@ public class BaseFetcher {
     private final Map<String, String> headers = new HashMap<>();
 
     BaseFetcher() {
+        //headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36");
     }
 
     BaseFetcher(JSONObject serializedFetcher) {
+        this();
         serializedFetcher.getJSONObject(COOKIES_KEY).toMap().forEach((k, v) -> cookies.put(k, (String) v));
         serializedFetcher.getJSONObject(HEADERS_KEY).toMap().forEach((k, v) -> headers.put(k, (String) v));
     }
 
-    String findAuthenticityToken(Document document) {
-        return document.selectFirst("input[name='authenticity_token']").val();
+    private Connection connect(String url) {
+        return Jsoup.connect(url).timeout(timeout).cookies(cookies).headers(headers);
     }
 
-    Connection connectNC(String url) {
-        return Jsoup.connect(url).timeout(timeout);
-    }
-
-    public Connection connect(String url) {
-        return connectNC(url).cookies(cookies);
-    }
-
-    Connection connect(String url, Map<String, String> headers) {
-        return connectNC(url).headers(headers);
+    public Document getDocumentNC(String url) throws IOException {
+        Connection.Response resp = Jsoup.connect(url).timeout(timeout).headers(headers).execute();
+        return resp.parse();
     }
 
     public JSONObject json(String url) throws IOException {
-        return new JSONObject(connect(url).headers(headers).ignoreContentType(true).get().text());
+        Connection.Response resp = get(url);
+        cookies.putAll(resp.cookies());
+        return new JSONObject(resp.body());
     }
 
-    public JSONObject json(String url, Map<String, String> headers) throws IOException {
-        return new JSONObject(connect(url, headers).ignoreContentType(true).get().text());
+    boolean login(String url, Map<String, String> credentials) throws IOException {
+        credentials.put("json", "true");
+        credentials.put("redirect", "false");
+
+        try {
+            cookies.putAll(post(url, credentials).cookies());
+            return true;
+        } catch (HttpStatusException ex) {
+            return false;
+        }
     }
 
-    void login(String url, Map<String, String> credentials) throws IOException {
-        cookies = post(url, credentials).cookies();
+    String getCsrfToken(String url) throws IOException {
+        Connection.Response resp = get(url);
+        cookies.putAll(resp.cookies());
+        return new JSONObject(resp.body()).getString("csrfToken");
     }
 
     private Connection.Response post(String url, Map<String, String> data) throws IOException {
         return connect(url)
                 .data(data)
+                .ignoreContentType(true)
                 .method(Connection.Method.POST)
+                .execute();
+    }
+
+    private Connection.Response get(String url) throws IOException {
+        return connect(url)
+                .ignoreContentType(true)
                 .execute();
     }
 

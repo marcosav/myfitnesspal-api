@@ -35,8 +35,7 @@ public class UserData {
     }
 
     private void parseMetadata() {
-        JSONObject diaryPreferences = userMetadata
-                .getJSONObject("diary_preferences");
+        JSONObject diaryPreferences = userMetadata.getJSONObject("diary_preferences");
 
         mealNames = toString(diaryPreferences.getJSONArray("meal_names"));
         trackedNutrients = toString(diaryPreferences.getJSONArray("tracked_nutrients"));

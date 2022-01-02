@@ -19,7 +19,7 @@ public class ReportDataFetcher {
     private Document document;
 
     void fetch(Date date) throws IOException {
-        document = fetcher.connect(getURLFullReport(date)).get();
+        document = fetcher.getDocumentNC(getURLFullReport(date));
     }
 
     Float[] getWeights() {
