@@ -6,46 +6,50 @@ plugins {
 group 'com.gmail.marcosav2010'
 version '0.3.2'
 
-subprojects {
-    apply plugin: 'java'
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
 
-    compileJava {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/marcosav/myfitnesspal-api")
+            credentials(PasswordCredentials)
+        }
     }
 
-    publishing {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/marcosav/myfitnesspal-api")
+    publications {
+        gpr(MavenPublication) {
+            group rootProject.group
+            version rootProject.version
 
-                credentials {
-                    username = findProperty("gpr.user")
-                    password = findProperty("gpr.key")
-                }
-            }
-        }
-
-        publications {
-            gpr(MavenPublication) {
-                group rootProject.group
-                version rootProject.version
-
-                from components.java
-            }
+            from components.java
         }
     }
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
+repositories {
+    mavenCentral()
+}
 
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-        }
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+
+    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
 }
