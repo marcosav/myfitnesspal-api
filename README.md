@@ -14,8 +14,9 @@ IMFPSession session = MFPSession.create(user, password, loginHandler);
 ```
 
 #### LoginHandler
-Since `v0.4` you have to provide a `LoginHandler` implementation to get session cookies
-since MFP added a captcha and broke the previous way of logging in.
+Since `v0.4` you have to provide a `LoginHandler`
+[implementation](src/main/java/com/gmail/marcosav2010/myfitnesspal/api/LoginHandler.java)
+to get the session cookies since MFP added a captcha and broke the previous way of logging in.
 
 Check out [this example Selenium implementation](src/test/java/com/gmail/marcosav2010/myfitnesspal/api/SeleniumLoginHandler.java)
 used for some basic tests.

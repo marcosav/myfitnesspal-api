@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestMFPSession {
 
     static {
-        System.setProperty("webdriver.gecko.driver", System.getProperty("user.dir") + "/src/test/resources/geckodriver");
+        SeleniumLoginHandler.setDriverProperties();
     }
 
     private static final float DELTA = 0.2f;

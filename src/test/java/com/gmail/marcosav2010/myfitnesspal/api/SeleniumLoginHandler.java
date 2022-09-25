@@ -84,4 +84,8 @@ public class SeleniumLoginHandler implements LoginHandler {
 
         return cookies;
     }
+
+    static void setDriverProperties() {
+        System.setProperty("webdriver.gecko.driver", System.getProperty("user.dir") + "/src/test/resources/geckodriver");
+    }
 }
