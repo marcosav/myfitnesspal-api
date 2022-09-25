@@ -19,17 +19,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestMFPSession {
 
+    static {
+        System.setProperty("webdriver.gecko.driver", System.getProperty("user.dir") + "/src/test/resources/geckodriver");
+    }
+
     private static final float DELTA = 0.2f;
 
     private static final String USER = System.getenv("MFP_USERNAME");
     private static final String PASSWORD = System.getenv("MFP_PASSWORD");
 
+    private final LoginHandler loginHandler = new SeleniumLoginHandler();
+
     @Test
-    void test() throws IOException {
-        IMFPSession session2 = MFPSession.create(USER, PASSWORD);
+    void test() throws IOException, LoginException {
+        IMFPSession session2 = MFPSession.create(USER, PASSWORD, loginHandler);
         String encoded = session2.encode();
 
-        IMFPSession session = MFPSession.from(encoded);
+        IMFPSession session = MFPSession.from(encoded, loginHandler);
 
         UserData userData = session.toUser();
         Diary diary = session.toDiary();

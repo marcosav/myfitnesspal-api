@@ -11,16 +11,13 @@ import lombok.NoArgsConstructor;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession implements IMFPSession {
 
     private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
 
-    private static final String CSRF_PATH = "api/auth/csrf";
-    private static final String LOGIN_PATH = "api/auth/callback/credentials";
+    private static final String LOGIN_PATH = "account/login";
     private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
 
     /*private static final String NUTRIENT_GOALS_DATA = "nutrient-goals?date=%s";
@@ -28,7 +25,6 @@ public class MFPSession implements IMFPSession {
 
     private BaseFetcher fetcher = new BaseFetcher();
 
-    private final String CSRF_URL = fetcher.getURL(CSRF_PATH);
     private final String LOGIN_URL = fetcher.getURL(LOGIN_PATH);
 
     private UserData userData;
@@ -63,22 +59,13 @@ public class MFPSession implements IMFPSession {
         return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_EXPIRATION_TIME;
     }
 
-    private void login(String username, String password) throws IOException {
-        String csrfToken = fetcher.getCsrfToken(CSRF_URL);
-
-        Map<String, String> credentials = new HashMap<>();
-
-        credentials.put("username", username);
-        credentials.put("password", password);
-        credentials.put("csrfToken", csrfToken);
-
-        if (!fetcher.login(LOGIN_URL, credentials))
-            throw new RuntimeException("Wrong user/password");
+    private void login(String username, String password) throws LoginException {
+        fetcher.login(LOGIN_URL, username, password);
 
         try {
             authenticate();
         } catch (Exception ex) {
-            throw new RuntimeException("There was an error while logging in: " + ex.getMessage(), ex);
+            throw new RuntimeException("There was an error while authenticating: " + ex.getMessage(), ex);
         }
     }
 
@@ -115,6 +102,10 @@ public class MFPSession implements IMFPSession {
         return this;
     }
 
+    private void setLoginHandler(LoginHandler loginHandler) {
+        fetcher.setLoginHandler(loginHandler);
+    }
+
     public UserData toUser() {
         return userData;
     }
@@ -123,14 +114,22 @@ public class MFPSession implements IMFPSession {
         return diary;
     }
 
-    public static IMFPSession create(String username, String password) throws IOException {
+    public static IMFPSession create(String username, String password, LoginHandler loginHandler) throws LoginException {
         MFPSession s = new MFPSession();
+        s.setLoginHandler(loginHandler);
         s.login(username, password);
         return s;
     }
 
-    public static IMFPSession from(String json) {
+    public static IMFPSession from(String json) throws LoginException {
         MFPSession s = new MFPSession();
+        s.decode(json);
+        return s;
+    }
+
+    public static IMFPSession from(String json, LoginHandler loginHandler) throws LoginException {
+        MFPSession s = new MFPSession();
+        s.setLoginHandler(loginHandler);
         s.decode(json);
         return s;
     }

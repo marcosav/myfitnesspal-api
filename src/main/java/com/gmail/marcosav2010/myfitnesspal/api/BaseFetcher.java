@@ -2,9 +2,9 @@ package com.gmail.marcosav2010.myfitnesspal.api;
 
 import com.gmail.marcosav2010.json.JSONObject;
 import lombok.AccessLevel;
+import lombok.NonNull;
 import lombok.Setter;
 import org.jsoup.Connection;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -37,13 +37,15 @@ public class BaseFetcher {
     }
 
     @Setter(AccessLevel.PACKAGE)
+    private LoginHandler loginHandler;
+
+    @Setter(AccessLevel.PACKAGE)
     private int timeout = TIMEOUT;
 
-    private Map<String, String> cookies = new HashMap<>();
+    private final Map<String, String> cookies = new HashMap<>();
     private final Map<String, String> headers = new HashMap<>();
 
     BaseFetcher() {
-        //headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36");
     }
 
     BaseFetcher(JSONObject serializedFetcher) {
@@ -67,30 +69,15 @@ public class BaseFetcher {
         return new JSONObject(resp.body());
     }
 
-    boolean login(String url, Map<String, String> credentials) throws IOException {
-        credentials.put("json", "true");
-        credentials.put("redirect", "false");
+    void login(@NonNull String url, @NonNull String username, @NonNull String password) throws LoginException {
+        if (loginHandler == null)
+            throw new IllegalStateException("There's no LoginHandler defined");
 
-        try {
-            cookies.putAll(post(url, credentials).cookies());
-            return true;
-        } catch (HttpStatusException ex) {
-            return false;
-        }
-    }
+        if (username.isBlank() || password.isBlank() || url.isBlank())
+            throw new IllegalArgumentException("URL, username and password must not be blank");
 
-    String getCsrfToken(String url) throws IOException {
-        Connection.Response resp = get(url);
-        cookies.putAll(resp.cookies());
-        return new JSONObject(resp.body()).getString("csrfToken");
-    }
-
-    private Connection.Response post(String url, Map<String, String> data) throws IOException {
-        return connect(url)
-                .data(data)
-                .ignoreContentType(true)
-                .method(Connection.Method.POST)
-                .execute();
+        Map<String, String> cookies = loginHandler.login(url, username, password);
+        this.cookies.putAll(cookies);
     }
 
     private Connection.Response get(String url) throws IOException {
