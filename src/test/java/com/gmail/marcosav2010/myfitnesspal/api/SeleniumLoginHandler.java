@@ -5,6 +5,7 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -23,13 +24,25 @@ public class SeleniumLoginHandler implements LoginHandler {
     private static final String PASSWORD_FIELD_NAME = "password";
     private static final String SUBMIT_BUTTON_XPATH = "//button[@type='submit']";
 
+    private final boolean headless;
+
+    public SeleniumLoginHandler() {
+        this(true);
+    }
+
+    public SeleniumLoginHandler(boolean headless) {
+        this.headless = headless;
+    }
+
     @Override
     public Map<String, String> login(String url, String username, String password) throws LoginException {
         Map<String, String> cookies = new HashMap<>();
         RemoteWebDriver driver = null;
 
         try {
-            driver = new FirefoxDriver();
+            FirefoxOptions options = new FirefoxOptions();
+            options.setHeadless(headless);
+            driver = new FirefoxDriver(options);
 
             driver.get(url);
 

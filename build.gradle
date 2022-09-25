@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.gmail.marcosav2010'
-version '0.4'
+version '0.4.1'
 
 publishing {
     repositories {
@@ -45,7 +45,7 @@ dependencies {
 
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.15.3'
 
-    implementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.4.0'
+    testImplementation group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.4.0'
 
     implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'

@@ -28,7 +28,7 @@ public class TestMFPSession {
     private static final String USER = System.getenv("MFP_USERNAME");
     private static final String PASSWORD = System.getenv("MFP_PASSWORD");
 
-    private final LoginHandler loginHandler = new SeleniumLoginHandler();
+    private final LoginHandler loginHandler = new SeleniumLoginHandler(false);
 
     @Test
     void test() throws IOException, LoginException {
