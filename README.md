@@ -3,19 +3,30 @@ API for accessing MyFitnessPal data
 
 Work in progress, more documentation and features coming soon...
 
-Create a new session as follows:
+## Usage
+
+### Create a new session
 
 ```java
-IMFPSession session = MFPSession.create(user, password);
+// Your custom implementation to log in and get session cookies
+LoginHandler loginHandler = ...;
+IMFPSession session = MFPSession.create(user, password, loginHandler);
 ```
 
-Access to diary fetcher with:
+#### LoginHandler
+Since `v0.4` you have to provide a `LoginHandler` implementation to get session cookies
+since MFP added a captcha and broke the previous way of logging in.
+
+Check out [this example Selenium implementation](src/test/java/com/gmail/marcosav2010/myfitnesspal/api/SeleniumLoginHandler.java)
+used for some basic tests.
+
+### Accessing to diary
 
 ```java
 Diary diary = session.toDiary();
 ```
 
-Then, use it like so:
+### Some examples
 ```java
 // Get one specific day data (to fetch specific data keep reading, this way can take more time and get unnecessary data)
 Day day = diary.getFullDay(date);
@@ -60,6 +71,7 @@ dinner.getFood().forEach(food -> {
 });
 ```
 
+### Exercise data
 Use ```Day``` to check fetched exercise data too:
 
 ```java
@@ -89,6 +101,7 @@ day.getStrengthExercises().forEach(strengthExercise -> {
 });
 ```
 
+### User data and settings
 Check user data and settings using ```UserData```:
 
 ```java
