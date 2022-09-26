@@ -11,6 +11,9 @@ Work in progress, more documentation and features coming soon...
 // Your custom implementation to log in and get session cookies
 LoginHandler loginHandler = ...;
 IMFPSession session = MFPSession.create(user, password, loginHandler);
+
+// You can also delegate credentials to the LoginHandler and avoid passing them
+IMFPSession session = MFPSession.create(loginHandler);
 ```
 
 #### LoginHandler
