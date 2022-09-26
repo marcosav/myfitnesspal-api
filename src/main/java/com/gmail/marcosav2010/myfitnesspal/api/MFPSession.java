@@ -121,6 +121,13 @@ public class MFPSession implements IMFPSession {
         return s;
     }
 
+    public static IMFPSession create(LoginHandler loginHandler) throws LoginException {
+        MFPSession s = new MFPSession();
+        s.setLoginHandler(loginHandler);
+        s.login(null, null);
+        return s;
+    }
+
     public static IMFPSession from(String json) {
         MFPSession s = new MFPSession();
         s.decode(json);

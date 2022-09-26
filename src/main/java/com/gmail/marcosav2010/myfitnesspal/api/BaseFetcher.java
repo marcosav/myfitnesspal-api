@@ -69,12 +69,9 @@ public class BaseFetcher {
         return new JSONObject(resp.body());
     }
 
-    void login(@NonNull String url, @NonNull String username, @NonNull String password) throws LoginException {
+    void login(@NonNull String url, String username, String password) throws LoginException {
         if (loginHandler == null)
             throw new IllegalStateException("There's no LoginHandler defined");
-
-        if (username.isBlank() || password.isBlank() || url.isBlank())
-            throw new IllegalArgumentException("URL, username and password must not be blank");
 
         Map<String, String> cookies = loginHandler.login(url, username, password);
         this.cookies.putAll(cookies);

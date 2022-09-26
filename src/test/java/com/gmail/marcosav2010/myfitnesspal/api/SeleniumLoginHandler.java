@@ -35,7 +35,16 @@ public class SeleniumLoginHandler implements LoginHandler {
     }
 
     @Override
-    public Map<String, String> login(String url, String username, String password) throws LoginException {
+    public Map<String, String> login(
+            String url,
+            String username,
+            String password) throws LoginException {
+        if (username == null || password == null || url == null)
+            throw new IllegalArgumentException("URL, username and password must not be null");
+
+        if (username.isBlank() || password.isBlank() || url.isBlank())
+            throw new IllegalArgumentException("URL, username and password must not be blank");
+
         Map<String, String> cookies = new HashMap<>();
         RemoteWebDriver driver = null;
 
