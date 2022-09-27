@@ -15,7 +15,7 @@ import java.util.Base64;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession implements IMFPSession {
 
-    private static final long ESTIMATED_SESSION_EXPIRATION_TIME = 2 * 3600 * 1000;
+    private static final long ESTIMATED_REAUTH_TIME = 2 * 3600 * 1000;
 
     private static final String LOGIN_PATH = "account/login";
     private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
@@ -56,20 +56,24 @@ public class MFPSession implements IMFPSession {
     }
 
     public boolean shouldReLog() {
-        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_EXPIRATION_TIME;
+        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_REAUTH_TIME;
+    }
+
+    private boolean shouldReAuth() {
+        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_REAUTH_TIME;
     }
 
     private void login(String username, String password) throws LoginException {
         fetcher.login(LOGIN_URL, username, password);
 
         try {
-            authenticate();
+            requestAuthToken();
         } catch (Exception ex) {
-            throw new RuntimeException("There was an error while authenticating: " + ex.getMessage(), ex);
+            throw new RuntimeException("There was an error while requesting auth token: " + ex.getMessage(), ex);
         }
     }
 
-    private void authenticate() throws IOException {
+    private void requestAuthToken() throws IOException {
         JSONObject authToken = fetcher.json(fetcher.getURL(USER_AUTH_DATA));
 
         creationTime = System.currentTimeMillis();
@@ -78,15 +82,15 @@ public class MFPSession implements IMFPSession {
         String accessToken = authToken.getString("access_token");
         String tokenType = authToken.getString("token_type");
 
-        fetcher.addHeader("Authorization", tokenType + " " + accessToken);
-        fetcher.addHeader("mfp-client-id", "mfp-main-js");
-        fetcher.addHeader("Accept", "application/json");
-        fetcher.addHeader("mfp-user-id", userId);
+        fetcher.setHeader("Authorization", tokenType + " " + accessToken);
+        fetcher.setHeader("mfp-client-id", "mfp-main-js");
+        fetcher.setHeader("Accept", "application/json");
+        fetcher.setHeader("mfp-user-id", userId);
 
-        load();
+        loadData();
     }
 
-    private void load() throws IOException {
+    private void loadData() throws IOException {
         UserFetcher userFetcher = new UserFetcher(fetcher);
         userData = userFetcher.load(userId);
 

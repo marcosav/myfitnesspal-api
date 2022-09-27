@@ -9,7 +9,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class UserFetcher {
 
-    private static final String USER_DATA = "users/%s?";
+    private static final String API_USER_DATA = "users/%s?";
 
     private static final String[] USER_DATA_QUERY_FIELDS = {
             "diary_preferences",
@@ -21,7 +21,8 @@ public class UserFetcher {
             "system_data",
             "profiles",
             "step_sources",
-            "app_preferences"
+            "app_preferences",
+            "privacy_preferences"
     };
 
     private final BaseFetcher fetcher;
@@ -39,6 +40,6 @@ public class UserFetcher {
         for (String f : args)
             queryFieldsUrl.append(BaseFetcher.ENCODED_FIELDS).append("=").append(f).append("&");
 
-        return fetcher.getApiURL(String.format(USER_DATA, userId) + queryFieldsUrl.toString());
+        return fetcher.getApiURL(String.format(API_USER_DATA, userId) + queryFieldsUrl);
     }
 }

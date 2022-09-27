@@ -22,6 +22,7 @@ public class ReportDataFetcher {
         document = fetcher.getDocumentNC(getURLFullReport(date));
     }
 
+    @Deprecated
     Float[] getWeights() {
         if (document == null)
             throw new IllegalStateException("No document fetched");

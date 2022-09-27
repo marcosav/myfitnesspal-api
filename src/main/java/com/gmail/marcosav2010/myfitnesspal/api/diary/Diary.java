@@ -22,7 +22,7 @@ public class Diary {
 
     static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static final String DIARY_DATA = "diary?%s=%s&entry_date=%s&types=%s";
+    private static final String DIARY_DATA = "diary?%s=%s&entry_date=%s&types=%s&fields=all";
     private static final String FOOD_NOTE_FOR_DATE = "food/note/%s?date=%s";
     private static final String FOOD_WATER_FOR_DATE = "food/water/%s?date=%s";
 
@@ -50,7 +50,7 @@ public class Diary {
         this.userData = userData;
         this.fetcher = fetcher;
         foodParser = new FoodParser(userData);
-        exerciseParser = new ExerciseParser();
+        exerciseParser = new ExerciseParser(userData);
         reportDataFetcher = new ReportDataFetcher(fetcher);
     }
 
@@ -119,16 +119,9 @@ public class Diary {
             }
         }
 
-        boolean reportNeeded = all ||
+        /*boolean reportNeeded = all ||
                 ps.contains(EXERCISE_NOTES) ||
-                (exercise && !strengthExercises.isEmpty());
-
-        if (reportNeeded) {
-            reportDataFetcher.fetch(date);
-
-            Float[] weights = reportDataFetcher.getWeights();
-            exerciseParser.updateWeights(strengthExercises, weights);
-        }
+                (exercise && !strengthExercises.isEmpty());*/
 
         String foodNotes = "", exerciseNotes = "";
         int water = 0;
@@ -137,16 +130,16 @@ public class Diary {
             water = getWater(date);
 
         if (all || ps.contains(FOOD_NOTES)) {
-            if (reportNeeded)
+            /*if (reportNeeded) // TODO: Fix report page load
                 foodNotes = reportDataFetcher.getNotes()[0];
-            else
+            else*/
                 foodNotes = getFoodNotes(date);
         }
 
-        if (all || ps.contains(EXERCISE_NOTES))
-            exerciseNotes = reportDataFetcher.getNotes()[1];
+        /*if (all || ps.contains(EXERCISE_NOTES))
+            exerciseNotes = reportDataFetcher.getNotes()[1];*/
 
-        reportDataFetcher.reset();
+        //reportDataFetcher.reset();
 
         return new Day(date, new ArrayList<>(meals.values()), cardioExercises,
                 strengthExercises, water, foodNotes, exerciseNotes);

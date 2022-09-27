@@ -9,7 +9,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -24,16 +23,16 @@ public class BaseFetcher {
     private static final String BASE_URL_SECURE = "https://www.myfitnesspal.com/";
     private static final String BASE_API_URL = "https://api.myfitnesspal.com/v2/";
 
+    private static final String SESSION_TOKEN_COOKIE = "__Secure-next-auth.session-token";
+    private static final String MFP_SESSION_COOKIE = "_mfp_session";
+
     public static String ENCODED_FIELDS, ENCODED_DELIMITER;
 
     public static final String ITEM_WRAPPER = "item", ITEMS_WRAPPER = "items";
 
     static {
-        try {
-            ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8.toString());
-            ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ignored) {
-        }
+        ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8);
+        ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8);
     }
 
     @Setter(AccessLevel.PACKAGE)
@@ -59,13 +58,17 @@ public class BaseFetcher {
     }
 
     public Document getDocumentNC(String url) throws IOException {
-        Connection.Response resp = Jsoup.connect(url).timeout(timeout).headers(headers).execute();
+        var resp = Jsoup.connect(url).timeout(timeout).headers(headers).execute();
         return resp.parse();
     }
 
     public JSONObject json(String url) throws IOException {
-        Connection.Response resp = get(url);
-        cookies.putAll(resp.cookies());
+        var resp = get(url);
+
+        var respCookies = resp.cookies();
+        if (respCookies.containsKey(MFP_SESSION_COOKIE))
+            cookies.put(MFP_SESSION_COOKIE, respCookies.get(MFP_SESSION_COOKIE));
+
         return new JSONObject(resp.body());
     }
 
@@ -73,8 +76,10 @@ public class BaseFetcher {
         if (loginHandler == null)
             throw new IllegalStateException("There's no LoginHandler defined");
 
-        Map<String, String> cookies = loginHandler.login(url, username, password);
-        this.cookies.putAll(cookies);
+        var loginCookies = loginHandler.login(url, username, password);
+        var sessionToken = loginCookies.get(SESSION_TOKEN_COOKIE);
+
+        cookies.put(SESSION_TOKEN_COOKIE, sessionToken);
     }
 
     private Connection.Response get(String url) throws IOException {
@@ -92,7 +97,7 @@ public class BaseFetcher {
         return jsonObject;
     }
 
-    void addHeader(String k, String v) {
+    void setHeader(String k, String v) {
         headers.put(k, v);
     }
 

@@ -62,7 +62,7 @@ public class TestMFPSession {
         Day result = diary.getFullDay(date);
 
         assertEquals("", result.getExerciseNote());
-        //assertEquals("hi test", result.getFoodNotes());
+        assertEquals("hi test", result.getFoodNotes());
 
         assertEquals(4, result.getMeals().size());
 
@@ -150,7 +150,7 @@ public class TestMFPSession {
         assertEquals(8, strengthExercise.getRepetitions());
         assertEquals(4, strengthExercise.getSets());
         assertEquals(32, strengthExercise.getQuantity());
-        //assertEquals(81.2, strengthExercise.getWeight(), DELTA);
+        assertEquals(81.2, strengthExercise.getWeight(), DELTA);
         assertEquals("Bench Press, Barbell", strengthExercise.getName());
     }
 }
