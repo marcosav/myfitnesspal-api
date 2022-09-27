@@ -119,9 +119,7 @@ public class Diary {
             }
         }
 
-        boolean reportNeeded = all ||
-                ps.contains(EXERCISE_NOTES) ||
-                (exercise && !strengthExercises.isEmpty());
+        boolean reportNeeded = all || ps.contains(EXERCISE_NOTES);
 
         if (reportNeeded)
             reportDataFetcher.fetch(date);
@@ -133,7 +131,7 @@ public class Diary {
             water = getWater(date);
 
         if (all || ps.contains(FOOD_NOTES)) {
-            if (reportNeeded) // TODO: Fix report page load
+            if (reportNeeded)
                 foodNotes = reportDataFetcher.getNotes()[0];
             else
                 foodNotes = getFoodNotes(date);
