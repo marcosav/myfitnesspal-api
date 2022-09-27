@@ -119,9 +119,12 @@ public class Diary {
             }
         }
 
-        /*boolean reportNeeded = all ||
+        boolean reportNeeded = all ||
                 ps.contains(EXERCISE_NOTES) ||
-                (exercise && !strengthExercises.isEmpty());*/
+                (exercise && !strengthExercises.isEmpty());
+
+        if (reportNeeded)
+            reportDataFetcher.fetch(date);
 
         String foodNotes = "", exerciseNotes = "";
         int water = 0;
@@ -130,16 +133,16 @@ public class Diary {
             water = getWater(date);
 
         if (all || ps.contains(FOOD_NOTES)) {
-            /*if (reportNeeded) // TODO: Fix report page load
+            if (reportNeeded) // TODO: Fix report page load
                 foodNotes = reportDataFetcher.getNotes()[0];
-            else*/
+            else
                 foodNotes = getFoodNotes(date);
         }
 
-        /*if (all || ps.contains(EXERCISE_NOTES))
-            exerciseNotes = reportDataFetcher.getNotes()[1];*/
+        if (all || ps.contains(EXERCISE_NOTES))
+            exerciseNotes = reportDataFetcher.getNotes()[1];
 
-        //reportDataFetcher.reset();
+        reportDataFetcher.reset();
 
         return new Day(date, new ArrayList<>(meals.values()), cardioExercises,
                 strengthExercises, water, foodNotes, exerciseNotes);

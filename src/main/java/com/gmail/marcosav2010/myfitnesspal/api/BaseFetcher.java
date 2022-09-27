@@ -57,8 +57,8 @@ public class BaseFetcher {
         return Jsoup.connect(url).timeout(timeout).cookies(cookies).headers(headers);
     }
 
-    public Document getDocumentNC(String url) throws IOException {
-        var resp = Jsoup.connect(url).timeout(timeout).headers(headers).execute();
+    public Document getDocumentNH(String url) throws IOException {
+        var resp = Jsoup.connect(url).timeout(timeout).cookies(cookies).execute();
         return resp.parse();
     }
 

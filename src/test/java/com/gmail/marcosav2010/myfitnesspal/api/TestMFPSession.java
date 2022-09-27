@@ -133,7 +133,7 @@ public class TestMFPSession {
         result = diary.getDay(date, Diary.EXERCISE, Diary.EXERCISE_NOTES);
 
         assertEquals("", result.getFoodNotes());
-        //assertEquals("ads", result.getExerciseNote());
+        assertEquals("ads", result.getExerciseNote());
         assertEquals(0, result.getWater());
 
         assertEquals(0, result.getMeals().size());
