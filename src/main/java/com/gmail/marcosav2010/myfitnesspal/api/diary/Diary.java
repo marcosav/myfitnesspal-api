@@ -26,6 +26,8 @@ public class Diary {
     private static final String FOOD_NOTE_FOR_DATE = "food/note/%s?date=%s";
     private static final String FOOD_WATER_FOR_DATE = "food/water/%s?date=%s";
 
+    private static final String ITEM_WRAPPER = "item", ITEMS_WRAPPER = "items";
+
     public static final byte WATER = 0,
             FOOD_NOTES = 1,
             EXERCISE_NOTES = 2,
@@ -101,7 +103,7 @@ public class Diary {
                 queryFields.add(EXERCISE_ENTRY);
 
             String url = getDiaryQuery(requestParam, DATE_FORMAT.format(date), queryFields.toArray(new String[0]));
-            JSONArray content = fetcher.json(url).getJSONArray(BaseFetcher.ITEMS_WRAPPER);
+            JSONArray content = fetcher.json(url).getJSONArray(ITEMS_WRAPPER);
 
             for (Object _o : content) {
                 JSONObject e = (JSONObject) _o;
@@ -180,8 +182,7 @@ public class Diary {
      * @throws IOException when there was any kind of error connecting to myfitnesspal, such as expired session
      */
     public int getWater(Date date) throws IOException {
-        JSONObject res = fetcher.json(getURLForDate(FOOD_WATER_FOR_DATE, date))
-                .getJSONObject(BaseFetcher.ITEM_WRAPPER);
+        JSONObject res = fetcher.json(getURLForDate(FOOD_WATER_FOR_DATE, date)).getJSONObject(ITEM_WRAPPER);
 
         return res.getInt(userData.getUnit(Unit.WATER));
     }
@@ -192,8 +193,7 @@ public class Diary {
      * @throws IOException when there was any kind of error connecting to myfitnesspal, such as expired session
      */
     public String getFoodNotes(Date date) throws IOException {
-        JSONObject res = fetcher.json(getURLForDate(FOOD_NOTE_FOR_DATE, date))
-                .getJSONObject(BaseFetcher.ITEM_WRAPPER);
+        JSONObject res = fetcher.json(getURLForDate(FOOD_NOTE_FOR_DATE, date)).getJSONObject(ITEM_WRAPPER);
 
         return res.getString("body");
     }

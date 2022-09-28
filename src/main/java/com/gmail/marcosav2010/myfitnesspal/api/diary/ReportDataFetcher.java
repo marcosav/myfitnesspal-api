@@ -19,7 +19,7 @@ public class ReportDataFetcher {
     private Document document;
 
     void fetch(Date date) throws IOException {
-        document = fetcher.getDocumentNH(getURLFullReport(date));
+        document = fetcher.getDocumentNoHeaders(getURLFullReport(date));
     }
 
     @Deprecated

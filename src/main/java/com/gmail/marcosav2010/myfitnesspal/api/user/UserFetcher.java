@@ -11,6 +11,8 @@ public class UserFetcher {
 
     private static final String API_USER_DATA = "users/%s?";
 
+    private static final String ITEM_WRAPPER = "item";
+
     private static final String[] USER_DATA_QUERY_FIELDS = {
             "diary_preferences",
             "goal_preferences",
@@ -29,7 +31,7 @@ public class UserFetcher {
 
     public UserData load(String userId) throws IOException {
         String queryUrl = getUserQuery(userId, USER_DATA_QUERY_FIELDS);
-        JSONObject content = fetcher.json(queryUrl).getJSONObject(BaseFetcher.ITEM_WRAPPER);
+        JSONObject content = fetcher.json(queryUrl).getJSONObject(ITEM_WRAPPER);
 
         return new UserData(content);
     }

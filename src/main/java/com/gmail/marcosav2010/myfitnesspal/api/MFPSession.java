@@ -4,101 +4,82 @@ import com.gmail.marcosav2010.json.JSONObject;
 import com.gmail.marcosav2010.myfitnesspal.api.diary.Diary;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserData;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserFetcher;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MFPSession implements IMFPSession {
 
-    private static final long ESTIMATED_REAUTH_TIME = 2 * 3600 * 1000;
-
+    private static final String
+            AUTH_HANDLER_KEY = "authHandler",
+            FETCHER_KEY = "fetcher",
+            USER_METADATA_KEY = "userMetadata",
+            CREATION_TIME_KEY = "creationTime";
     private static final String LOGIN_PATH = "account/login";
-    private static final String USER_AUTH_DATA = "user/auth_token/?refresh=true";
 
     /*private static final String NUTRIENT_GOALS_DATA = "nutrient-goals?date=%s";
     private static final String MEASUREMENTS_DATA = "incubator/measurements?entry_date=%s"; //most_recent=true */
 
-    private BaseFetcher fetcher = new BaseFetcher();
+    private static final long ESTIMATED_SESSION_DURATION = 28 * 24 * 3600 * 1000L;
 
-    private final String LOGIN_URL = fetcher.getURL(LOGIN_PATH);
+    private final BaseFetcher fetcher;
+    private final APIAuthHandler authHandler;
 
     private UserData userData;
     private Diary diary;
 
-    private String userId;
-
     @Getter
     private long creationTime;
 
-    public String encode() {
-        JSONObject json = new JSONObject();
-
-        json.put("creationTime", creationTime);
-        json.put("fetcher", fetcher.toJSONObject());
-        json.put("userMetadata", userData.toJSONObject());
-
-        return new String(Base64.getUrlEncoder().encode(json.toString().getBytes(StandardCharsets.UTF_8)));
+    private MFPSession() {
+        fetcher = new BaseFetcher();
+        authHandler = new APIAuthHandler(fetcher);
     }
 
-    private void decode(String encoded) {
-        JSONObject json = new JSONObject(new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8));
+    private MFPSession(JSONObject serialized) {
+        fetcher = new BaseFetcher(serialized.getJSONObject(FETCHER_KEY));
+        authHandler = new APIAuthHandler(serialized.getJSONObject(AUTH_HANDLER_KEY), fetcher);
+        creationTime = serialized.getLong(CREATION_TIME_KEY);
+        userData = new UserData(serialized.getJSONObject(USER_METADATA_KEY));
 
-        creationTime = json.getLong("creationTime");
-        userData = new UserData(json.getJSONObject("userMetadata"));
-        fetcher = new BaseFetcher(json.getJSONObject("fetcher"));
+        fetcher.setHeaderProvider(authHandler);
+    }
 
-        init();
+    public String encode() {
+        return fromJSONObject(toJSONObject());
     }
 
     public boolean shouldReLog() {
-        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_REAUTH_TIME;
+        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_DURATION;
     }
 
-    private boolean shouldReAuth() {
-        return (System.currentTimeMillis() - creationTime) >= ESTIMATED_REAUTH_TIME;
-    }
+    private MFPSession login(String username, String password) throws LoginException {
+        fetcher.login(fetcher.getURL(LOGIN_PATH), username, password);
 
-    private void login(String username, String password) throws LoginException {
-        fetcher.login(LOGIN_URL, username, password);
+        String userId;
 
         try {
-            requestAuthToken();
+            userId = authHandler.auth();
         } catch (Exception ex) {
             throw new RuntimeException("There was an error while requesting auth token: " + ex.getMessage(), ex);
         }
+
+        fetcher.setHeaderProvider(authHandler);
+
+        try {
+            loadData(userId);
+        } catch (IOException ex) {
+            throw new RuntimeException("There was an error while loading user data: " + ex.getMessage(), ex);
+        }
+
+        return this;
     }
 
-    private void requestAuthToken() throws IOException {
-        JSONObject authToken = fetcher.json(fetcher.getURL(USER_AUTH_DATA));
-
-        creationTime = System.currentTimeMillis();
-
-        userId = authToken.getString("user_id");
-        String accessToken = authToken.getString("access_token");
-        String tokenType = authToken.getString("token_type");
-
-        fetcher.setHeader("Authorization", tokenType + " " + accessToken);
-        fetcher.setHeader("mfp-client-id", "mfp-main-js");
-        fetcher.setHeader("Accept", "application/json");
-        fetcher.setHeader("mfp-user-id", userId);
-
-        loadData();
-    }
-
-    private void loadData() throws IOException {
+    private void loadData(String userId) throws IOException {
         UserFetcher userFetcher = new UserFetcher(fetcher);
         userData = userFetcher.load(userId);
-
-        init();
-    }
-
-    private void init() {
-        diary = new Diary(userData, fetcher);
     }
 
     public IMFPSession setTimeout(int timeout) {
@@ -106,8 +87,9 @@ public class MFPSession implements IMFPSession {
         return this;
     }
 
-    private void setLoginHandler(LoginHandler loginHandler) {
+    private MFPSession setLoginHandler(LoginHandler loginHandler) {
         fetcher.setLoginHandler(loginHandler);
+        return this;
     }
 
     public UserData toUser() {
@@ -115,33 +97,43 @@ public class MFPSession implements IMFPSession {
     }
 
     public Diary toDiary() {
+        if (diary == null)
+            diary = new Diary(userData, fetcher);
         return diary;
     }
 
+    private JSONObject toJSONObject() {
+        JSONObject json = new JSONObject();
+
+        json.put(CREATION_TIME_KEY, creationTime);
+        json.put(AUTH_HANDLER_KEY, authHandler.toJSONObject());
+        json.put(FETCHER_KEY, fetcher.toJSONObject());
+        json.put(USER_METADATA_KEY, userData.toJSONObject());
+
+        return json;
+    }
+
+    private static JSONObject toJSONObject(String encoded) {
+        return new JSONObject(new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8));
+    }
+
+    private static String fromJSONObject(JSONObject json) {
+        return new String(Base64.getUrlEncoder().encode(json.toString().getBytes(StandardCharsets.UTF_8)));
+    }
+
     public static IMFPSession create(String username, String password, LoginHandler loginHandler) throws LoginException {
-        MFPSession s = new MFPSession();
-        s.setLoginHandler(loginHandler);
-        s.login(username, password);
-        return s;
+        return new MFPSession().setLoginHandler(loginHandler).login(username, password);
     }
 
     public static IMFPSession create(LoginHandler loginHandler) throws LoginException {
-        MFPSession s = new MFPSession();
-        s.setLoginHandler(loginHandler);
-        s.login(null, null);
-        return s;
+        return new MFPSession().setLoginHandler(loginHandler).login(null, null);
     }
 
     public static IMFPSession from(String json) {
-        MFPSession s = new MFPSession();
-        s.decode(json);
-        return s;
+        return new MFPSession(toJSONObject(json));
     }
 
     public static IMFPSession from(String json, LoginHandler loginHandler) {
-        MFPSession s = new MFPSession();
-        s.setLoginHandler(loginHandler);
-        s.decode(json);
-        return s;
+        return new MFPSession(toJSONObject(json)).setLoginHandler(loginHandler);
     }
 }
