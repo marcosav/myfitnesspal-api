@@ -56,6 +56,8 @@ public class MFPSession implements IMFPSession {
     }
 
     private MFPSession login(String username, String password) throws LoginException {
+        creationTime = System.currentTimeMillis();
+
         fetcher.login(fetcher.getURL(LOGIN_PATH), username, password);
 
         String userId;
