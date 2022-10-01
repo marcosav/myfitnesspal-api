@@ -1,7 +1,5 @@
 # myfitnesspal-api
-API for accessing MyFitnessPal data 
-
-Work in progress, more documentation and features coming soon...
+Library for accessing MyFitnessPal data.
 
 ## Usage
 
