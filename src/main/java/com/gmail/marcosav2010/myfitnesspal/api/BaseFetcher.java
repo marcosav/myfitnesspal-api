@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -28,8 +29,16 @@ public class BaseFetcher {
     private static final String SESSION_TOKEN_COOKIE = "__Secure-next-auth.session-token";
     private static final String MFP_SESSION_COOKIE = "_mfp_session";
 
-    public static String ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8);
-    public static String ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8);
+    public static String ENCODED_FIELDS, ENCODED_DELIMITER;
+
+    static {
+        try {
+            ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8.toString());
+            ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Setter(AccessLevel.PACKAGE)
     private LoginHandler loginHandler;
