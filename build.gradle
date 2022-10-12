@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.gmail.marcosav2010'
-version '0.5.2'
+version '0.5.3'
 
 publishing {
     repositories {

@@ -57,8 +57,10 @@ class APIAuthHandler implements APIHeaderProvider {
     }
 
     public Map<String, String> getHeaders() throws IOException {
-        if (autoReauthenticate && shouldReauthenticate())
+        if (autoReauthenticate && shouldReauthenticate()) {
+            fetcher.setHeaderProvider(null);
             auth();
+        }
         return headers;
     }
 
