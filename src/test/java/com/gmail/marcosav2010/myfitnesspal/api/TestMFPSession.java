@@ -28,7 +28,7 @@ public class TestMFPSession {
     private static final String USER = System.getenv("MFP_USERNAME");
     private static final String PASSWORD = System.getenv("MFP_PASSWORD");
 
-    private final LoginHandler loginHandler = new SeleniumLoginHandler(false);
+    private final LoginHandler loginHandler = new SeleniumLoginHandler(true);
 
     @Test
     void test() throws IOException, LoginException {
@@ -153,4 +153,15 @@ public class TestMFPSession {
         assertEquals(81.2, strengthExercise.getWeight(), DELTA);
         assertEquals("Bench Press, Barbell", strengthExercise.getName());
     }
+
+    /*@Test
+    void testReauth() throws IOException, LoginException, InterruptedException {
+        IMFPSession session = MFPSession.create(USER, PASSWORD, loginHandler);
+        Diary diary = session.toDiary();
+        diary.getDay(new Date(), Diary.FOOD);
+        Thread.sleep(5000L);
+        diary.getDay(new Date(), Diary.FOOD);
+        Thread.sleep(500L);
+        diary.getDay(new Date(), Diary.FOOD);
+    }*/
 }

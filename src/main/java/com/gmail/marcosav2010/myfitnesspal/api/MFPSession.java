@@ -68,8 +68,6 @@ public class MFPSession implements IMFPSession {
             throw new RuntimeException("There was an error while requesting auth token: " + ex.getMessage(), ex);
         }
 
-        fetcher.setHeaderProvider(authHandler);
-
         try {
             loadData(userId);
         } catch (IOException ex) {

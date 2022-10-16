@@ -39,6 +39,7 @@ class APIAuthHandler implements APIHeaderProvider {
     }
 
     String auth() throws IOException {
+        System.out.println("auth");
         JSONObject authResponse = fetcher.json(fetcher.getURL(USER_AUTH_DATA));
 
         authTime = System.currentTimeMillis();
@@ -52,6 +53,8 @@ class APIAuthHandler implements APIHeaderProvider {
         headers.put("mfp-client-id", "mfp-main-js");
         headers.put("Accept", "application/json");
         headers.put("mfp-user-id", userId);
+
+        fetcher.setHeaderProvider(this);
 
         return userId;
     }
