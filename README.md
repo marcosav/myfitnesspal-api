@@ -19,8 +19,16 @@ Since `v0.4` you have to provide a `LoginHandler`
 [implementation](src/main/java/com/gmail/marcosav2010/myfitnesspal/api/LoginHandler.java)
 to get the session cookies since MFP added a captcha and broke the previous way of logging in.
 
-Check out [this example Selenium implementation](src/test/java/com/gmail/marcosav2010/myfitnesspal/api/SeleniumLoginHandler.java)
-used for some basic tests.
+~~Check out [this example Selenium implementation](src/test/java/com/gmail/marcosav2010/myfitnesspal/api/SeleniumLoginHandler.java)
+used for some basic tests.~~
+
+**Update**: MyFitnessPal has improved its capcha verification and some other
+obstacles that made the Selenium approach not viable anymore.
+
+I have made a [MyFitnessPal API Server](https://github.com/marcosav/myfitnesspal-api-server) which makes use of this
+library and provides a REST API to access MFP data using browser cookies.
+It also provides a python library alternative implementation in case this one stopped working.
+But definitely there is no way to use this library as it was before.
 
 ### Accessing to diary
 
