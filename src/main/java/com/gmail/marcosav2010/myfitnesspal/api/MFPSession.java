@@ -55,6 +55,11 @@ public class MFPSession implements IMFPSession {
         return (System.currentTimeMillis() - creationTime) >= ESTIMATED_SESSION_DURATION;
     }
 
+    private MFPSession login() throws LoginException {
+        return login(null, null);
+    }
+
+    @Deprecated
     private MFPSession login(String username, String password) throws LoginException {
         creationTime = System.currentTimeMillis();
 
@@ -121,12 +126,16 @@ public class MFPSession implements IMFPSession {
         return new String(Base64.getUrlEncoder().encode(json.toString().getBytes(StandardCharsets.UTF_8)));
     }
 
-    public static IMFPSession create(String username, String password, LoginHandler loginHandler) throws LoginException {
+    @Deprecated
+    public static IMFPSession create(
+            String username,
+            String password,
+            LoginHandler loginHandler) throws LoginException {
         return new MFPSession().setLoginHandler(loginHandler).login(username, password);
     }
 
     public static IMFPSession create(LoginHandler loginHandler) throws LoginException {
-        return new MFPSession().setLoginHandler(loginHandler).login(null, null);
+        return new MFPSession().setLoginHandler(loginHandler).login();
     }
 
     public static IMFPSession from(String json) {

@@ -26,18 +26,13 @@ public class BaseFetcher {
     private static final String BASE_URL_SECURE = "https://www.myfitnesspal.com/";
     private static final String BASE_API_URL = "https://api.myfitnesspal.com/v2/";
 
-    private static final String SESSION_TOKEN_COOKIE = "__Secure-next-auth.session-token";
     private static final String MFP_SESSION_COOKIE = "_mfp_session";
 
     public static String ENCODED_FIELDS, ENCODED_DELIMITER;
 
     static {
-        try {
-            ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8.toString());
-            ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        ENCODED_FIELDS = URLEncoder.encode("fields[]", StandardCharsets.UTF_8);
+        ENCODED_DELIMITER = URLEncoder.encode(",", StandardCharsets.UTF_8);
     }
 
     @Setter(AccessLevel.PACKAGE)
@@ -82,9 +77,8 @@ public class BaseFetcher {
             throw new IllegalStateException("There's no LoginHandler defined");
 
         var loginCookies = loginHandler.login(url, username, password);
-        var sessionToken = loginCookies.get(SESSION_TOKEN_COOKIE);
 
-        cookies.put(SESSION_TOKEN_COOKIE, sessionToken);
+        cookies.putAll(loginCookies);
     }
 
     private Connection.Response get(String url) throws IOException {

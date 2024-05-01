@@ -124,7 +124,7 @@ public class Diary {
         boolean reportNeeded = all || ps.contains(EXERCISE_NOTES);
 
         if (reportNeeded)
-            reportDataFetcher.fetch(date);
+            reportDataFetcher.fetch(date, userData.getUsername());
 
         String foodNotes = "", exerciseNotes = "";
         int water = 0;

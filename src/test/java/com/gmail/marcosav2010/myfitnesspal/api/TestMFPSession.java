@@ -8,6 +8,7 @@ import com.gmail.marcosav2010.myfitnesspal.api.diary.food.DiaryFood;
 import com.gmail.marcosav2010.myfitnesspal.api.diary.food.DiaryMeal;
 import com.gmail.marcosav2010.myfitnesspal.api.diary.food.FoodValues;
 import com.gmail.marcosav2010.myfitnesspal.api.user.UserData;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,7 +18,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestMFPSession {
+@Deprecated
+class TestMFPSession {
 
     static {
         SeleniumLoginHandler.setDriverProperties();
@@ -30,6 +32,7 @@ public class TestMFPSession {
 
     private final LoginHandler loginHandler = new SeleniumLoginHandler(true);
 
+    @Disabled("Selenium login handler no longer works")
     @Test
     void test() throws IOException, LoginException {
         IMFPSession session2 = MFPSession.create(USER, PASSWORD, loginHandler);

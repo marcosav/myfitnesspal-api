@@ -12,14 +12,14 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class ReportDataFetcher {
 
-    private static final String FULL_DIARY_REPORT = "reports/printable_diary?from=%s&to=%s";
+    private static final String FULL_DIARY_REPORT = "reports/printable_diary/%s?from=%s&to=%s";
 
     private final BaseFetcher fetcher;
 
     private Document document;
 
-    void fetch(Date date) throws IOException {
-        document = fetcher.getDocumentNoHeaders(getURLFullReport(date));
+    void fetch(Date date, String username) throws IOException {
+        document = fetcher.getDocumentNoHeaders(getURLFullReport(date, username));
     }
 
     @Deprecated
@@ -61,8 +61,8 @@ public class ReportDataFetcher {
         document = null;
     }
 
-    private String getURLFullReport(Date date) {
+    private String getURLFullReport(Date date, String username) {
         String d = Diary.DATE_FORMAT.format(date);
-        return fetcher.getURL(FULL_DIARY_REPORT, d, d);
+        return fetcher.getURL(FULL_DIARY_REPORT, username, d, d);
     }
 }

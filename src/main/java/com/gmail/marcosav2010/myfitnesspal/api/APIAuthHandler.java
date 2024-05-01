@@ -39,7 +39,6 @@ class APIAuthHandler implements APIHeaderProvider {
     }
 
     String auth() throws IOException {
-        System.out.println("auth");
         JSONObject authResponse = fetcher.json(fetcher.getURL(USER_AUTH_DATA));
 
         authTime = System.currentTimeMillis();

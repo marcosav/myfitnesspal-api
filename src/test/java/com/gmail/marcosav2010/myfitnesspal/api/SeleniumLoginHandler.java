@@ -1,7 +1,6 @@
 package com.gmail.marcosav2010.myfitnesspal.api;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -10,19 +9,17 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class SeleniumLoginHandler implements LoginHandler {
 
     private static final int LOGIN_WAIT_SECONDS = 10;
 
-    private static final String EMAIL_FIELD_NAME = "email";
+    private static final String EMAIL_FIELD_NAME = "//input[@name='email']";
     private static final String PASSWORD_FIELD_NAME = "password";
-    private static final String SUBMIT_BUTTON_XPATH = "//button[@type='submit']";
+    private static final String SUBMIT_BUTTON_XPATH = "//button[@type='title']";
 
     private final boolean headless;
 
@@ -55,16 +52,19 @@ public class SeleniumLoginHandler implements LoginHandler {
 
             driver.get(url);
 
-            // Avoid rejecting cookies manually
-            Date expire = Date.from(LocalDate.now().plusYears(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Cookie cookieGdpr = new Cookie("notice_gdpr_prefs", "0:", ".myfitnesspal.com", "/", expire, true);
-            Cookie cookiePrefs = new Cookie("notice_preferences", "0:", ".myfitnesspal.com", "/", expire, true);
-            driver.manage().addCookie(cookieGdpr);
-            driver.manage().addCookie(cookiePrefs);
+            var sel = By.xpath("//iframe[@title='SP Consent Message']");
 
-            driver.navigate().refresh();
+            new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -> d.findElement(sel));
 
-            WebElement emailField = driver.findElement(By.name(EMAIL_FIELD_NAME));
+            driver.switchTo().frame(driver.findElement(sel));
+
+            WebElement b = driver.findElement(By.xpath("//button[@title='AGREE AND PROCEED']"));
+            b.click();
+
+            new WebDriverWait(driver, Duration.ofSeconds(2))
+                    .until(d -> false);
+
+            WebElement emailField = driver.findElement(By.xpath(EMAIL_FIELD_NAME));
             WebElement passwordField = driver.findElement(By.name(PASSWORD_FIELD_NAME));
 
             emailField.sendKeys(username.trim());
@@ -72,8 +72,11 @@ public class SeleniumLoginHandler implements LoginHandler {
 
             String lastUrl = driver.getCurrentUrl();
 
-            WebElement submit = driver.findElement(By.xpath(SUBMIT_BUTTON_XPATH));
-            submit.click();
+            /*WebElement submit = driver.findElement(By.xpath(SUBMIT_BUTTON_XPATH));
+            submit.click();*/
+
+            new WebDriverWait(driver, Duration.ofSeconds(100000))
+                    .until(d -> false);
 
             new WebDriverWait(driver, Duration.ofSeconds(LOGIN_WAIT_SECONDS))
                     .until(d -> !d.getCurrentUrl().equalsIgnoreCase(lastUrl));
@@ -108,6 +111,8 @@ public class SeleniumLoginHandler implements LoginHandler {
     }
 
     static void setDriverProperties() {
-        System.setProperty("webdriver.gecko.driver", System.getProperty("user.dir") + "/src/test/resources/geckodriver");
+        var driverPath = System.getProperty("user.dir") + "/src/test/resources/geckodriver";
+        System.out.println("Setting geckodriver to " + driverPath);
+        System.setProperty("webdriver.gecko.driver", driverPath);
     }
 }
